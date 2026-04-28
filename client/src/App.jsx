@@ -10,6 +10,7 @@ import Leaderboard from './pages/Leaderboard';
 import ArticleList from './pages/ArticleList';
 import ArticleDetail from './pages/ArticleDetail';
 import AdminPanel from './pages/Admin';
+import Profile from './pages/Profile';
 
 import Landing from './pages/Landing';
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/leaderboard" element={<ProtectedRoute><Layout><Leaderboard /></Layout></ProtectedRoute>} />
         <Route path="/articles" element={<ProtectedRoute><Layout><ArticleList /></Layout></ProtectedRoute>} />
         <Route path="/articles/:slug" element={<ProtectedRoute><Layout><ArticleDetail /></Layout></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
         
         <Route path="/admin/*" element={<AdminRoute><Layout><AdminPanel /></Layout></AdminRoute>} />
       </Routes>

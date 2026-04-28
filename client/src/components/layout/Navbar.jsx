@@ -9,7 +9,8 @@ import {
   Sparkles,
   Menu,
   X,
-  BookText
+  BookText,
+  User
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -18,28 +19,42 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleLogout = () => {
+    setIsOpen(false);
     logout();
     navigate('/login');
   };
 
-  const NavLinks = ({ mobile = false }) => (
-    <>
-      <Link to="/dashboard" className="nav-link">
-        <LayoutDashboard size={18} /> <span>Dashboard</span>
-      </Link>
-      <Link to="/articles" className="nav-link">
-        <BookText size={18} /> <span>Articles</span>
-      </Link>
-      <Link to="/leaderboard" className="nav-link">
-        <Trophy size={18} /> <span>Leaderboard</span>
-      </Link>
-      {user?.role === 'admin' && (
-        <Link to="/admin" className="nav-link text-orange-500">
-          <Shield size={18} /> <span>Admin</span>
+  const NavLinks = ({ mobile = false }) => {
+    const closeMenu = () => {
+      if (mobile) setIsOpen(false);
+    };
+
+    return (
+      <>
+        <Link to="/dashboard" onClick={closeMenu} className="nav-link">
+          <LayoutDashboard size={18} /> <span>Dashboard</span>
         </Link>
-      )}
-    </>
-  );
+
+        <Link to="/articles" onClick={closeMenu} className="nav-link">
+          <BookText size={18} /> <span>Articles</span>
+        </Link>
+
+        <Link to="/leaderboard" onClick={closeMenu} className="nav-link">
+          <Trophy size={18} /> <span>Leaderboard</span>
+        </Link>
+
+        <Link to="/profile" onClick={closeMenu} className="nav-link">
+          <User size={18} /> <span>Profile</span>
+        </Link>
+
+        {user?.role === 'admin' && (
+          <Link to="/admin" onClick={closeMenu} className="nav-link text-orange-500">
+            <Shield size={18} /> <span>Admin</span>
+          </Link>
+        )}
+      </>
+    );
+  };
 
   return (
     <nav className="bg-white/80 backdrop-blur border-b shadow-sm sticky top-0 z-50">
@@ -119,8 +134,13 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link to="/login">Login</Link>
-              <Link to="/signup" className="block bg-primary text-white px-4 py-2 rounded-lg">
+              <Link to="/login" onClick={() => setIsOpen(false)}>Login</Link>
+
+              <Link
+                to="/signup"
+                onClick={() => setIsOpen(false)}
+                className="block bg-primary text-white px-4 py-2 rounded-lg"
+              >
                 Sign Up
               </Link>
             </>

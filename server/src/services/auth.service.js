@@ -61,6 +61,28 @@ class AuthService {
     }
     return user;
   }
+
+  async updateMe(userId, updateData) {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (updateData.name) user.name = updateData.name;
+    if (updateData.bio !== undefined) user.profile.bio = updateData.bio;
+    if (updateData.avatar !== undefined) user.profile.avatar = updateData.avatar;
+
+    await user.save();
+
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      profile: user.profile,
+      stats: user.stats
+    };
+  }
 }
 
 module.exports = new AuthService();

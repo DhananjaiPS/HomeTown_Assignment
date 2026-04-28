@@ -65,8 +65,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (updateData) => {
+    const res = await axiosInstance.put('/auth/me', updateData);
+    const updatedUser = res.data;
+    setUser(updatedUser);
+    localStorage.setItem('lms_user', JSON.stringify(updatedUser));
+    return updatedUser;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout, isLoading, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout, isLoading, refreshUser, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -24,6 +24,16 @@ export const useSubmissions = (assignmentId) => {
   });
 };
 
+export const useMySubmissions = () => {
+  return useQuery({
+    queryKey: ['submissions', 'me', 'all'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get(`/submissions/me`);
+      return data;
+    }
+  });
+};
+
 export const useSubmitAssignment = () => {
   const queryClient = useQueryClient();
   return useMutation({

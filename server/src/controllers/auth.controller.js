@@ -36,6 +36,15 @@ exports.getMe = async (req, res, next) => {
   }
 };
 
+exports.updateMe = async (req, res, next) => {
+  try {
+    const data = await authService.updateMe(req.user._id, req.body);
+    sendResponse(res, 200, 'User updated successfully', data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.logout = (req, res) => {
   // In a stateless JWT setup, logout is handled on the client by destroying the token.
   // We just return success.
