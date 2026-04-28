@@ -14,7 +14,11 @@ const loginSchema = z.object({
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'r@gmail.com',
+      password: '123456'
+    }
   });
   const { login } = useAuth();
   const navigate = useNavigate();

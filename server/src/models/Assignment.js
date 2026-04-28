@@ -24,7 +24,8 @@ const questionSchema = new mongoose.Schema({
   expectedAnswer: { type: String }, // Only for short_answer
   rubric: { type: String },         // Only for short_answer
   marks: { type: Number, required: true },
-  difficulty: { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' }
+  difficulty: { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' },
+  aiHintCache: { type: String }     // Cache for AI generated hint
 });
 
 const assignmentSchema = new mongoose.Schema({

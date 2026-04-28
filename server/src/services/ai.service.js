@@ -26,9 +26,12 @@ class AIService {
     }
   }
 
-  async generateHint(userId, questionText) {
+  async generateHint(userId, questionText, useFallback = false) {
+    const currentModelName = useFallback ? FALLBACK_MODEL_NAME : MODEL_NAME;
+    const currentModel = useFallback ? this.fallbackTextModel : this.textModel;
+
     if (!this.hasKey) {
-      await this._logUsage(userId, 'hint', MODEL_NAME, true, null, 0, 0);
+      await this._logUsage(userId, 'hint', currentModelName, true, null, 0, 0);
       return 'Mock Hint: Focus on the main concept in the question and connect it with the article.';
     }
 
@@ -49,17 +52,35 @@ Question:
 ${cleanQuestion}
 `.trim();
 
-      const result = await this.textModel.generateContent(prompt);
+      const result = await currentModel.generateContent(prompt);
       const text = this._clean(result.response.text());
       const inputTokens = result.response.usageMetadata?.promptTokenCount || 0;
       const outputTokens = result.response.usageMetadata?.candidatesTokenCount || 0;
 
-      await this._logUsage(userId, 'hint', MODEL_NAME, true, null, inputTokens, outputTokens);
+      await this._logUsage(userId, 'hint', currentModelName, true, null, inputTokens, outputTokens);
 
       return text || 'Think about the main concept in the question.';
     } catch (err) {
-      await this._logUsage(userId, 'hint', MODEL_NAME, false, err.message, 0, 0);
-      return 'Failed to generate a hint right now.';
+      console.error(`[Gemini Error in generateHint - ${currentModelName}]:`, err.message);
+      
+      // 4. AUTOMATIC FALLBACK LOGIC
+      if (err.message.includes('503') && !useFallback) {
+        console.log(`🔄 Google 2.5 servers are busy. Retrying automatically with ${FALLBACK_MODEL_NAME}...`);
+        return this.generateHint(userId, questionText, true);
+      }
+
+      await this._logUsage(userId, 'hint', currentModelName, false, err.message, 0, 0);
+
+      // --- 🌟 THE PRO HANDLING 🌟 ---
+      if (err.message.includes('503') || err.message.includes('429') || err.message.includes('demand')) {
+        return "⏳ The AI servers are busy right now. Please try again in a few seconds!";
+      }
+
+      if (err.message.includes('API key')) {
+        return "⚠️ Configuration Error: The AI service API key is misconfigured or disabled.";
+      }
+
+      return 'Failed to generate a hint right now due to an unexpected error.';
     }
   }
 

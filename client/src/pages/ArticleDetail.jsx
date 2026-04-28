@@ -9,8 +9,10 @@ import {
 } from '../hooks/useSubmissions';
 import toast from 'react-hot-toast';
 import { BookOpen, Sparkles, CheckCircle, Clock, Info } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const ArticleDetail = () => {
+  const { user, refreshUser } = useAuth();
   const { slug } = useParams();
 
   const { data: articleResponse, isLoading: isArticleLoading } = useArticle(slug);
@@ -36,6 +38,7 @@ const ArticleDetail = () => {
   const [summary, setSummary] = useState('');
   const [answers, setAnswers] = useState({});
   const [hints, setHints] = useState({});
+  const [loadingHintQuestionId, setLoadingHintQuestionId] = useState(null);
 
   useEffect(() => {
     if (!article?._id) return;
@@ -97,6 +100,7 @@ const ArticleDetail = () => {
       } else {
         // Standard Success
         toast.success(cached ? 'AI Summary loaded from cache!' : 'AI Summary generated!');
+        if (!cached) refreshUser(); // Update tokens in navbar
       }
 
     } catch (error) {
@@ -106,8 +110,19 @@ const ArticleDetail = () => {
   };
 
   const handleGetHint = async (questionId, questionText) => {
+    if (!assignmentData?._id) {
+      toast.error('Assignment not loaded');
+      return;
+    }
+
     try {
-      const res = await hintMutation.mutateAsync(questionText);
+      setLoadingHintQuestionId(questionId);
+
+      const res = await hintMutation.mutateAsync({
+        assignmentId: assignmentData._id,
+        questionId,
+        questionText
+      });
 
       const hintText =
         res?.data?.hint ||
@@ -115,19 +130,25 @@ const ArticleDetail = () => {
         res?.data?.data?.hint ||
         res;
 
+      const cached = res?.data?.cached ?? res?.cached ?? false;
+
       if (!hintText || typeof hintText !== 'string') {
         toast.error('Failed to get hint');
         return;
       }
 
       setHints((prev) => ({ ...prev, [questionId]: hintText }));
-      toast.success('Hint generated');
+      toast.success(cached ? 'Hint loaded from cache!' : 'Hint generated!');
+      if (!cached) refreshUser(); // Update tokens in navbar
+
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||
         error?.message ||
         'Failed to get hint'
       );
+    } finally {
+      setLoadingHintQuestionId(null);
     }
   };
 
@@ -403,11 +424,17 @@ const ArticleDetail = () => {
                     <button
                       type="button"
                       onClick={() => handleGetHint(q._id, q.questionText)}
-                      disabled={hintMutation.isPending}
-                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 font-medium disabled:opacity-50"
+                      // Keep the lock so they can't spam multiple API calls at once
+                      disabled={loadingHintQuestionId !== null}
+                      className={`text-sm flex items-center gap-1 font-medium transition-all ${loadingHintQuestionId === q._id
+                        ? 'text-blue-600 opacity-50 cursor-wait' // Only the active button fades out
+                        : loadingHintQuestionId !== null
+                          ? 'text-gray-400 cursor-not-allowed'     // Other buttons look inactive but NOT fetching
+                          : 'text-blue-600 hover:text-blue-800'    // Default state
+                        }`}
                     >
                       <Sparkles size={14} />
-                      {hintMutation.isPending ? 'Generating hint...' : 'Get AI Hint'}
+                      {loadingHintQuestionId === q._id ? 'Generating hint...' : 'Get AI Hint'}
                     </button>
 
                     {hints[q._id] && (

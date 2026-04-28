@@ -53,8 +53,20 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('lms_user');
   };
 
+  const refreshUser = async () => {
+    if (token) {
+      try {
+        const res = await axiosInstance.get('/auth/me');
+        setUser(res.data);
+        localStorage.setItem('lms_user', JSON.stringify(res.data));
+      } catch (error) {
+        console.error("Failed to refresh user", error);
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, signup, logout, isLoading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -42,9 +42,9 @@ export const useSubmitAssignment = () => {
 
 export const useAiHint = () => {
   return useMutation({
-    mutationFn: async (questionText) => {
-      const { data } = await axiosInstance.post(`/ai/hint`, { questionText });
-      return data.hint;
+    mutationFn: async ({ assignmentId, questionId, questionText }) => {
+      const { data } = await axiosInstance.post(`/ai/hint`, { assignmentId, questionId, questionText });
+      return data;
     }
   });
 };
