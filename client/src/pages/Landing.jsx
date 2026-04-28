@@ -13,49 +13,62 @@ const Landing = () => {
 
       <main className="flex-1 w-full flex flex-col">
         {/* HERO SECTION */}
-        <section className="relative w-full overflow-hidden bg-gradient-to-b from-blue-50 to-white pt-24 pb-32 px-4 sm:px-6 lg:px-8">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] opacity-30 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 blur-3xl rounded-full mix-blend-multiply animate-pulse"></div>
-          </div>
-          
+        <section className="relative w-full h-[100vh] overflow-hidden pt-24 pb-32 px-4 sm:px-6 lg:px-8 bg-slate-950">
+          {/* Background Image */}
+          <div
+            className="absolute inset-0 bg-contain bg-center opacity-40"
+            style={{
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1932&auto=format&fit=crop')",
+            }}
+          />
+
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/80 to-slate-950" />
+
+          {/* Glow */}
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[900px] h-[420px] bg-blue-500/30 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[300px] bg-purple-500/20 blur-3xl rounded-full pointer-events-none" />
+
           <div className="relative max-w-5xl mx-auto text-center z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-semibold text-sm mb-8 animate-fade-in-up">
-              <Sparkles size={16} className="text-blue-500" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-blue-200 font-semibold text-sm mb-8 border border-white/10 backdrop-blur">
+              <Sparkles size={16} className="text-blue-300" />
               <span>Next-Generation AI Learning</span>
             </div>
-            
-            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 tracking-tight mb-8">
+
+            <h1 className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-8">
               Master new skills with <br className="hidden md:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-300 to-purple-300">
                 Intelligent Guidance
               </span>
             </h1>
-            
-            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-              Mini AI LMS transforms how you learn. Read premium articles, tackle interactive assignments, and get real-time AI hints when you're stuck.
+
+            <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+              Mini AI LMS helps you read smarter, practice faster, and improve with AI-powered hints, summaries, and real-time performance insights.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               {user ? (
-                <Link 
-                  to="/dashboard" 
-                  className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 group text-lg"
+                <Link
+                  to="/dashboard"
+                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/40 transition-all flex items-center justify-center gap-2 group text-lg"
                 >
                   Go to Dashboard
                   <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                 </Link>
               ) : (
                 <>
-                  <Link 
-                    to="/signup" 
-                    className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 group text-lg"
+                  <Link
+                    to="/signup"
+                    className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/40 transition-all flex items-center justify-center gap-2 group text-lg"
                   >
                     Start Learning Free
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <Link 
-                    to="/login" 
-                    className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 text-gray-800 font-bold border border-gray-200 rounded-xl shadow-sm transition-all flex items-center justify-center text-lg"
+
+                  <Link
+                    to="/login"
+                    className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 rounded-xl backdrop-blur transition-all flex items-center justify-center text-lg"
                   >
                     Log In
                   </Link>
@@ -125,7 +138,7 @@ const Landing = () => {
               Empowering the next generation of learners with artificial intelligence and gamified education.
             </p>
           </div>
-          
+
           <div>
             <h4 className="text-white font-bold mb-4">Platform</h4>
             <ul className="space-y-2">
@@ -144,7 +157,7 @@ const Landing = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto pt-8 border-t border-gray-800 text-sm text-gray-500 flex flex-col md:flex-row justify-between items-center">
           <p>&copy; {new Date().getFullYear()} Mini AI LMS. All rights reserved.</p>
           <div className="flex items-center gap-1 mt-4 md:mt-0">

@@ -129,7 +129,7 @@ const Navbar = () => {
       )}
 
       {/* Tailwind helper */}
-      <style jsx>{`
+      <style>{`
         .nav-link {
           display: flex;
           align-items: center;

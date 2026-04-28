@@ -23,6 +23,11 @@ class AIService {
         model: MODEL_NAME,
         generationConfig: { responseMimeType: 'application/json' },
       });
+
+      this.fallbackJsonModel = this.genAI.getGenerativeModel({
+        model: FALLBACK_MODEL_NAME,
+        generationConfig: { responseMimeType: 'application/json' },
+      });
     }
   }
 
@@ -102,6 +107,74 @@ ${cleanQuestion}
       }
     } catch (e) {
       logger.error('Failed to log AI usage', e);
+    }
+  }
+
+  async evaluateShortAnswer(userId, questionText, expectedAnswer, rubric, userAnswer, maxMarks, useFallback = false) {
+    if (!this.hasKey) {
+      return {
+        score: Math.floor(maxMarks / 2),
+        feedback: 'Mock evaluation: Your answer touches on some key points but lacks depth.',
+        improvement: 'Include more specific examples.'
+      };
+    }
+
+    const currentModelName = useFallback ? FALLBACK_MODEL_NAME : MODEL_NAME;
+    const currentModel = useFallback ? this.fallbackJsonModel : this.jsonModel;
+
+    try {
+      const prompt = `
+        You are an expert educational evaluator. Evaluate the student's short answer against the expected answer and rubric.
+        
+        Question: ${questionText}
+        Expected Answer: ${expectedAnswer || 'N/A'}
+        Rubric: ${rubric || 'N/A'}
+        Student's Answer: ${userAnswer}
+        Maximum Marks: ${maxMarks}
+
+        Return ONLY a JSON object with the following structure:
+        {
+          "score": <number between 0 and ${maxMarks}, representing the marks awarded based on correctness and rubric>,
+          "feedback": "<string: what they did well and what they missed in 1-2 sentences>",
+          "improvement": "<string: actionable advice on how to improve in 1 sentence>"
+        }
+      `.trim();
+
+      const res = await currentModel.generateContent(prompt);
+      const text = res.response.text();
+      
+      const inputTokens = res.response.usageMetadata?.promptTokenCount || 0;
+      const outputTokens = res.response.usageMetadata?.candidatesTokenCount || 0;
+      await this._logUsage(userId, 'evaluation', currentModelName, true, null, inputTokens, outputTokens);
+
+      let cleanText = text.trim();
+      if (cleanText.startsWith('```json')) {
+        cleanText = cleanText.replace(/^```json\n?/, '').replace(/```$/, '').trim();
+      } else if (cleanText.startsWith('```')) {
+        cleanText = cleanText.replace(/^```\n?/, '').replace(/```$/, '').trim();
+      }
+
+      const parsed = JSON.parse(cleanText);
+      return {
+        score: Number(parsed.score) || 0,
+        feedback: parsed.feedback || 'Good attempt.',
+        improvement: parsed.improvement || 'N/A'
+      };
+    } catch (err) {
+      console.error(`[Gemini Error in evaluateShortAnswer - ${currentModelName}]:`, err.message);
+      
+      if (err.message.includes('503') && !useFallback) {
+        console.log(`🔄 Google 2.5 servers are busy. Retrying evaluateShortAnswer automatically with ${FALLBACK_MODEL_NAME}...`);
+        return this.evaluateShortAnswer(userId, questionText, expectedAnswer, rubric, userAnswer, maxMarks, true);
+      }
+
+      await this._logUsage(userId, 'evaluation', currentModelName, false, err.message, 0, 0);
+
+      return {
+        score: 0,
+        feedback: 'AI evaluation failed.',
+        improvement: 'Please try submitting again later.'
+      };
     }
   }
 
