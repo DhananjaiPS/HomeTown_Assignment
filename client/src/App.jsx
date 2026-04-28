@@ -11,6 +11,8 @@ import ArticleList from './pages/ArticleList';
 import ArticleDetail from './pages/ArticleDetail';
 import AdminPanel from './pages/Admin';
 
+import Landing from './pages/Landing';
+
 // Placeholders for remaining pages
 
 function App() {
@@ -18,10 +20,10 @@ function App() {
     <>
       <Toaster position="top-right" />
       <Routes>
+        <Route path="/" element={<Landing />} />
+        
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        
-        <Route path="/" element={<ProtectedRoute><Layout><Navigate to="/dashboard" replace /></Layout></ProtectedRoute>} />
         
         <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
         <Route path="/leaderboard" element={<ProtectedRoute><Layout><Leaderboard /></Layout></ProtectedRoute>} />
