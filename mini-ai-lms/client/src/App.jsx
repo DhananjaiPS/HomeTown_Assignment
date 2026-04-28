@@ -1,0 +1,37 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import Layout from './components/layout/Layout';
+import { ProtectedRoute, AdminRoute } from './routes/ProtectedRoute';
+
+import Dashboard from './pages/Dashboard';
+import Leaderboard from './pages/Leaderboard';
+import ArticleList from './pages/ArticleList';
+import ArticleDetail from './pages/ArticleDetail';
+import AdminPanel from './pages/Admin';
+
+// Placeholders for remaining pages
+
+function App() {
+  return (
+    <>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        
+        <Route path="/" element={<ProtectedRoute><Layout><Navigate to="/dashboard" replace /></Layout></ProtectedRoute>} />
+        
+        <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+        <Route path="/leaderboard" element={<ProtectedRoute><Layout><Leaderboard /></Layout></ProtectedRoute>} />
+        <Route path="/articles" element={<ProtectedRoute><Layout><ArticleList /></Layout></ProtectedRoute>} />
+        <Route path="/articles/:slug" element={<ProtectedRoute><Layout><ArticleDetail /></Layout></ProtectedRoute>} />
+        
+        <Route path="/admin/*" element={<AdminRoute><Layout><AdminPanel /></Layout></AdminRoute>} />
+      </Routes>
+    </>
+  );
+}
+
+export default App;
