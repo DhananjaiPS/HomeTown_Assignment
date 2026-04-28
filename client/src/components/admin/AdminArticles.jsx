@@ -76,7 +76,7 @@ const AdminArticles = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <h2 className="text-xl font-bold flex items-center gap-2"><BookOpen size={20}/> Manage Articles</h2>
         <button 
           onClick={() => {
@@ -103,7 +103,7 @@ const AdminArticles = () => {
             <label className="block text-sm font-medium mb-1">Content</label>
             <textarea required className="w-full border p-2 rounded h-32" value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})}></textarea>
           </div>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Difficulty</label>
               <select className="w-full border p-2 rounded" value={formData.difficulty} onChange={e => setFormData({...formData, difficulty: e.target.value})}>
@@ -133,9 +133,10 @@ const AdminArticles = () => {
         </form>
       )}
 
-      <div className="bg-card border border-border rounded overflow-hidden">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-gray-50 border-b border-border">
+      <div className="bg-card border border-border rounded shadow-sm overflow-hidden max-w-full">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[600px] text-left text-sm whitespace-nowrap">
+            <thead className="bg-gray-50 border-b border-border">
             <tr>
               <th className="p-4 font-semibold">Title</th>
               <th className="p-4 font-semibold">Difficulty</th>
@@ -159,27 +160,30 @@ const AdminArticles = () => {
                   </span>
                 </td>
                 <td className="p-4 text-gray-500">{new Date(article.createdAt).toLocaleDateString()}</td>
-                <td className="p-4 text-right flex justify-end gap-2">
-                  <button onClick={() => {
-                     setEditingId(article._id);
-                     setFormData({
-                       title: article.title,
-                       content: article.content,
-                       difficulty: article.difficulty,
-                       readingTimeMinutes: article.readingTimeMinutes,
-                       tags: article.tags ? article.tags.join(', ') : '',
-                       status: article.status || 'draft'
-                     });
-                     setIsCreating(true);
-                  }} className="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded"><Edit size={16}/></button>
-                  <button onClick={() => {
-                     if(window.confirm('Delete article?')) deleteMutation.mutate(article._id);
-                  }} className="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded"><Trash size={16}/></button>
+                <td className="p-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => {
+                       setEditingId(article._id);
+                       setFormData({
+                         title: article.title,
+                         content: article.content,
+                         difficulty: article.difficulty,
+                         readingTimeMinutes: article.readingTimeMinutes,
+                         tags: article.tags ? article.tags.join(', ') : '',
+                         status: article.status || 'draft'
+                       });
+                       setIsCreating(true);
+                    }} className="text-blue-500 hover:text-blue-700 p-1.5 bg-blue-50 rounded-md transition-colors"><Edit size={16}/></button>
+                    <button onClick={() => {
+                       if(window.confirm('Delete article?')) deleteMutation.mutate(article._id);
+                    }} className="text-red-500 hover:text-red-700 p-1.5 bg-red-50 rounded-md transition-colors"><Trash size={16}/></button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
         {data?.pages > 1 && (
           <div className="p-4 flex gap-2 justify-center bg-gray-50">
              <button disabled={page===1} onClick={()=>setPage(p=>p-1)} className="px-3 py-1 border rounded disabled:opacity-50 text-sm">Prev</button>

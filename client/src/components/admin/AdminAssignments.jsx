@@ -336,27 +336,40 @@ const AdminAssignments = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center gap-4">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <FileQuestion size={20} />
-          {isFormVisible ? (editingId ? 'Edit Assignment' : 'New Assignment') : 'Manage Assignments'}
-        </h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-2xl sm:text-xl font-black text-gray-900 flex items-center gap-2">
+            <FileQuestion size={22} className="text-blue-600 shrink-0" />
+            {isFormVisible
+              ? editingId
+                ? 'Edit Assignment'
+                : 'New Assignment'
+              : 'Manage Assignments'}
+          </h2>
+
+          {!isFormVisible && (
+            <p className="mt-1 text-sm text-gray-500">
+              Create, edit and manage learner assessments.
+            </p>
+          )}
+        </div>
 
         {!isFormVisible && (
-          <div className="flex flex-col items-end">
+          <div className="w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setIsFormVisible(true)}
               disabled={availableArticles.length === 0}
-              className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-5 text-sm font-bold text-white shadow-md shadow-blue-100 transition-all hover:from-blue-600 hover:to-blue-700 hover:shadow-lg active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-none disabled:bg-gray-300"
             >
-              <Plus size={16} />
+              <Plus size={18} />
               New Assignment
             </button>
+
             {availableArticles.length === 0 && assignments.length > 0 && (
-              <span className="text-xs text-red-500 mt-1 max-w-[200px] text-right">
+              <p className="mt-2 text-left sm:text-right text-xs text-red-500 sm:max-w-[240px]">
                 All published articles already have assignments. Edit or archive an existing assignment instead.
-              </span>
+              </p>
             )}
           </div>
         )}
@@ -416,17 +429,17 @@ const AdminAssignments = () => {
                       </td>
                       <td className="px-4 py-4 text-right">
                         <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={() => handleEdit(a)} 
-                            className="text-blue-600 bg-blue-50 hover:bg-blue-100 p-2 rounded transition-colors" 
+                          <button
+                            onClick={() => handleEdit(a)}
+                            className="text-blue-600 bg-blue-50 hover:bg-blue-100 p-2 rounded transition-colors"
                             title="Edit Assignment"
                           >
                             <Edit size={16} />
                           </button>
-                          <button 
-                            onClick={() => handleDelete(a._id)} 
-                            disabled={deleteMutation.isPending} 
-                            className="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded transition-colors disabled:opacity-50" 
+                          <button
+                            onClick={() => handleDelete(a._id)}
+                            disabled={deleteMutation.isPending}
+                            className="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded transition-colors disabled:opacity-50"
                             title="Delete or Archive"
                           >
                             <Trash size={16} />
@@ -456,13 +469,13 @@ const AdminAssignments = () => {
                 onChange={(e) => setFormData({ ...formData, articleId: e.target.value })}
               >
                 <option value="">{isArticlesLoading ? 'Loading articles...' : 'Select an Article'}</option>
-                {editingId 
+                {editingId
                   ? articles.filter(a => a._id === formData.articleId).map(article => (
-                      <option key={article._id} value={article._id}>{article.title}</option>
-                    ))
+                    <option key={article._id} value={article._id}>{article.title}</option>
+                  ))
                   : availableArticles.map((article) => (
-                      <option key={article._id} value={article._id}>{article.title}</option>
-                    ))
+                    <option key={article._id} value={article._id}>{article.title}</option>
+                  ))
                 }
               </select>
             </div>
@@ -500,7 +513,7 @@ const AdminAssignments = () => {
                 value={questions.reduce((sum, question) => sum + Number(question.marks || 0), 0)}
               />
             </div>
-            
+
             <div className="lg:col-span-2">
               <label className="block text-sm font-medium mb-1 text-gray-700">Status</label>
               <select
@@ -672,18 +685,37 @@ const AdminAssignments = () => {
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
               <p className="text-sm font-medium text-gray-700 mb-3">Add a new question:</p>
-              <div className="flex flex-wrap gap-3">
-                <button type="button" onClick={() => addQuestion('true_false')} className="border border-gray-300 px-4 py-2 text-sm font-medium rounded-lg bg-white hover:bg-gray-100 transition-colors shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => addQuestion('true_false')}
+                  className="w-full h-11 border border-gray-300 rounded-xl bg-white text-sm font-semibold shadow-sm hover:bg-gray-100 transition flex items-center justify-center"
+                >
                   + True / False
                 </button>
-                <button type="button" onClick={() => addQuestion('mcq')} className="border border-gray-300 px-4 py-2 text-sm font-medium rounded-lg bg-white hover:bg-gray-100 transition-colors shadow-sm">
-                  + MCQ <span className="font-normal text-gray-500">(Single Answer)</span>
+
+                <button
+                  type="button"
+                  onClick={() => addQuestion('mcq')}
+                  className="w-full h-11 border border-gray-300 rounded-xl bg-white text-sm font-semibold shadow-sm hover:bg-gray-100 transition flex items-center justify-center"
+                >
+                  + MCQ
                 </button>
-                <button type="button" onClick={() => addQuestion('msq')} className="border border-gray-300 px-4 py-2 text-sm font-medium rounded-lg bg-white hover:bg-gray-100 transition-colors shadow-sm">
-                  + MSQ <span className="font-normal text-gray-500">(Multiple Answers)</span>
+
+                <button
+                  type="button"
+                  onClick={() => addQuestion('msq')}
+                  className="w-full h-11 border border-gray-300 rounded-xl bg-white text-sm font-semibold shadow-sm hover:bg-gray-100 transition flex items-center justify-center"
+                >
+                  + MSQ
                 </button>
-                <button type="button" onClick={() => addQuestion('short_answer')} className="border border-purple-200 px-4 py-2 text-sm font-medium rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors shadow-sm">
-                  + AI Short Answer
+
+                <button
+                  type="button"
+                  onClick={() => addQuestion('short_answer')}
+                  className="w-full h-11 border border-purple-200 rounded-xl bg-purple-50 text-purple-700 text-sm font-semibold shadow-sm hover:bg-purple-100 transition flex items-center justify-center"
+                >
+                  + AI Answer
                 </button>
               </div>
             </div>
