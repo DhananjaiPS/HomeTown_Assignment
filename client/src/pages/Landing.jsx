@@ -14,10 +14,10 @@ const Landing = () => {
 
       <main className="flex-1 w-full flex flex-col">
         {/* HERO SECTION */}
-        <section className="relative w-full h-[100vh] overflow-hidden pt-24 pb-32 px-4 sm:px-6 lg:px-8 bg-slate-950">
+        <section className="relative w-full min-h-[90vh] pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-slate-950 flex items-center justify-center">
           {/* Background Image */}
           <div
-            className="absolute inset-0 bg-contain bg-center opacity-40"
+            className="absolute inset-0 bg-cover bg-center opacity-40 bg-no-repeat z-0"
             style={{
               backgroundImage:
                 "url('https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1932&auto=format&fit=crop')",
@@ -69,7 +69,7 @@ const Landing = () => {
 
                   <Link
                     to="/login"
-                    className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold border border-white/20 rounded-xl backdrop-blur transition-all flex items-center justify-center text-lg"
+                    className="w-full sm:w-auto px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold border border-white/30 rounded-xl backdrop-blur transition-all flex items-center justify-center text-lg mt-2 sm:mt-0 shadow-lg"
                   >
                     Log In
                   </Link>
@@ -78,7 +78,6 @@ const Landing = () => {
             </div>
           </div>
         </section>
-
         {/* FEATURES SECTION */}
         <Features />
 
