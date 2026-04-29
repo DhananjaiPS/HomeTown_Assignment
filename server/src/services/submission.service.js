@@ -159,7 +159,10 @@ class SubmissionService {
       // socket not initialized during testing
     }
 
-    return submission;
+    // Get updated stats for the user to return to frontend
+    const updatedUser = await User.findById(userId).select('stats');
+
+    return { submission, stats: updatedUser.stats };
   }
 
   async getMySubmissions(userId, query) {

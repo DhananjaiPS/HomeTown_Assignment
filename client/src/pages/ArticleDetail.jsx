@@ -100,7 +100,13 @@ const ArticleDetail = () => {
       } else {
         // Standard Success
         toast.success(cached ? 'AI Summary loaded from cache!' : 'AI Summary generated!');
-        if (!cached) refreshUser(); // Update tokens in navbar
+        
+        // UPDATE TOKEN COUNT INSTANTLY
+        if (res?.data?.stats && user) {
+          setUser({ ...user, stats: res.data.stats });
+        } else if (!cached) {
+          refreshUser();
+        }
       }
 
     } catch (error) {
@@ -139,7 +145,13 @@ const ArticleDetail = () => {
 
       setHints((prev) => ({ ...prev, [questionId]: hintText }));
       toast.success(cached ? 'Hint loaded from cache!' : 'Hint generated!');
-      if (!cached) refreshUser(); // Update tokens in navbar
+      
+      // UPDATE TOKEN COUNT INSTANTLY
+      if (res?.data?.stats && user) {
+        setUser({ ...user, stats: res.data.stats });
+      } else if (!cached) {
+        refreshUser();
+      }
 
     } catch (error) {
       toast.error(
@@ -185,12 +197,19 @@ const ArticleDetail = () => {
     }
 
     try {
-      await submitMutation.mutateAsync({
+      const res = await submitMutation.mutateAsync({
         articleId: article._id,
         assignmentId: assignmentData._id,
         answers: formattedAnswers,
         timeTakenSeconds: 120,
       });
+
+      // UPDATE TOKEN COUNT INSTANTLY (AI evaluation uses tokens)
+      if (res?.data?.stats && user) {
+        setUser({ ...user, stats: res.data.stats });
+      } else {
+        refreshUser();
+      }
 
       toast.success('Assignment evaluated successfully!');
     } catch (error) {

@@ -36,10 +36,53 @@ exports.getHint = async (req, res, next) => {
     }
 
     sendResponse(res, 200, 'Hint generated successfully', { 
-      hint,
-      cached: false
+      hint: hint.hint,
+      cached: false,
+      stats: hint.stats
     });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.chat = async (req, res, next) => {
+  try {
+    const { message, articleId, assignmentId, mode } = req.body;
+    const userId = req.user._id;
+
+    if (!message) {
+      return res.status(400).json({ success: false, message: 'Message is required' });
+    }
+
+    const response = await aiService.chat(userId, message, articleId, assignmentId, mode);
+
+    res.status(200).json({
+      success: true,
+      data: response
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.ingest = async (req, res, next) => {
+  try {
+    const { articleId } = req.body;
+    const Article = require('../models/Article');
+    const ragService = require('../services/rag.service');
+    
+    const article = await Article.findById(articleId);
+    if (!article) {
+      return res.status(404).json({ success: false, message: 'Article not found' });
+    }
+
+    await ragService.ingestArticle(article);
+
+    res.status(200).json({
+      success: true,
+      message: 'Article successfully vectorized for RAG'
+    });
+  } catch (err) {
+    next(err);
   }
 };

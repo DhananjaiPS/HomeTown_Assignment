@@ -1,5 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
+import ChatbotButton from '../chatbot/ChatbotButton';
 
 const Layout = ({ children }) => {
   return (
@@ -11,6 +12,7 @@ const Layout = ({ children }) => {
       <footer className="border-t border-border bg-card py-6 text-center text-sm text-gray-500">
         &copy; {new Date().getFullYear()} Mini AI LMS. All rights reserved.
       </footer>
+      <ChatbotButton />
     </div>
   );
 };

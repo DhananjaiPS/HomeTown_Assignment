@@ -198,7 +198,7 @@ class ArticleService {
     });
 
     console.log(`--- [AI SUMMARY DEBUG] END ---\n`);
-    return { summary: result.summary, cached: false };
+    return { summary: result.summary, cached: false, stats: result.stats };
   }
 }
 
