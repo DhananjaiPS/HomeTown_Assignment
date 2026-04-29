@@ -10,8 +10,9 @@ const Layout = ({ children }) => {
         {children}
       </main>
       <footer className="border-t border-border bg-card py-6 text-center text-sm text-gray-500">
-        &copy; {new Date().getFullYear()} Mini AI LMS. All rights reserved.
+        &copy; {new Date().getFullYear()} Mini AI LMS. All rights reserved
       </footer>
+
       <ChatbotButton />
     </div>
   );
