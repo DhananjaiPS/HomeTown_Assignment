@@ -115,6 +115,33 @@ cd client && npm run dev
 
 ---
 
+## 📡 API Documentation (v1)
+
+### 🔐 Authentication
+- `POST /auth/signup` - Register a new user
+- `POST /auth/login` - Login and receive JWT
+- `GET /auth/me` - Get current user profile & stats
+
+### 📖 Articles
+- `GET /articles` - List all published articles (with search/filters)
+- `GET /articles/:slug` - Get single article details
+- `POST /articles` (Admin) - Create new article
+- `GET /articles/:id/ai-summary` - Generate/Fetch AI summary
+
+### ✍️ Assignments & Submissions
+- `GET /assignments/article/:articleId` - Get assignment for an article
+- `POST /submissions` - Submit assignment answers (AI evaluation triggered)
+- `GET /submissions/me` - Get current user's submission history
+
+### 🤖 AI & Chat
+- `POST /ai/chat` - Interact with AI mentor (supports RAG & Fuzzy Match)
+- `POST /ai/hint` - Generate hint for a specific question
+
+### 📊 Leaderboard
+- `GET /leaderboard` - Get top learners ranked by score and completion
+
+---
+
 ## 🏥 Health Check
 - **Endpoint**: `GET /api/v1/auth/me` (Requires token)
 - **Status**: Returns 200 OK if the system is alive and authenticated.
