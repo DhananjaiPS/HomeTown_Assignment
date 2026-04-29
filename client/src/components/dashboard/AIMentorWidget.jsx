@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axiosInstance from '../../api/axios';
 import { MessageSquare, Send, X, Bot, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const AIMentorWidget = () => {
+  const { user, setUser } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { role: 'mentor', text: "Hi! I'm your AI Mentor. I won't give you direct answers, but I'll guide you to find them yourself. What are you stuck on today?" }
@@ -20,12 +22,20 @@ const AIMentorWidget = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await axiosInstance.post('/adaptive/mentor', {
+      const res = await axiosInstance.post('/adaptive/mentor', {
         message: userMessage,
         context: { location: 'dashboard' }
       });
       
-      setMessages(prev => [...prev, { role: 'mentor', text: data.data.reply }]);
+      const responseData = res;
+      setMessages(prev => [...prev, { role: 'mentor', text: responseData.reply }]);
+      
+      // Update global stats
+      if (responseData.stats && user) {
+        const updatedUser = { ...user, stats: responseData.stats };
+        setUser(updatedUser);
+        localStorage.setItem('lms_user', JSON.stringify(updatedUser));
+      }
     } catch (err) {
       setMessages(prev => [...prev, { role: 'mentor', text: "Sorry, my brain is taking a break. Let's try again later!" }]);
     } finally {

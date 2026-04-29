@@ -29,7 +29,8 @@ export const useAIChat = () => {
         mode: context.mode || 'normal'
       });
 
-      const { answer, source, usedRAG, mode } = response.data;
+      const responseData = response.data;
+      const { answer, source, usedRAG, mode, stats } = responseData;
 
       const aiMessage = {
         id: (Date.now() + 1).toString(),
@@ -38,14 +39,15 @@ export const useAIChat = () => {
         source,
         usedRAG,
         mode,
+        stats,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, aiMessage]);
       
       // Update local user stats instantly if returned
-      if (response.data.stats && user) {
-        const updatedUser = { ...user, stats: response.data.stats };
+      if (stats && user) {
+        const updatedUser = { ...user, stats: stats };
         setUser(updatedUser);
         localStorage.setItem('lms_user', JSON.stringify(updatedUser));
       } else {

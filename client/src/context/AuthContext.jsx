@@ -16,8 +16,9 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const res = await axiosInstance.get('/auth/me');
-          setUser(res.data);
-          localStorage.setItem('lms_user', JSON.stringify(res.data));
+          const userData = res.data;
+          setUser(userData);
+          localStorage.setItem('lms_user', JSON.stringify(userData));
         } catch (error) {
           console.error("Failed to fetch user context", error);
           logout();
@@ -30,7 +31,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await axiosInstance.post('/auth/login', { email, password });
-    const { token, user } = res.data;
+    const loginData = res.data;
+    const { token, user } = loginData;
     setToken(token);
     setUser(user);
     localStorage.setItem('lms_token', token);
@@ -39,7 +41,8 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     const res = await axiosInstance.post('/auth/signup', { name, email, password });
-    const { token, user } = res.data;
+    const signupData = res.data;
+    const { token, user } = signupData;
     setToken(token);
     setUser(user);
     localStorage.setItem('lms_token', token);
@@ -57,8 +60,9 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         const res = await axiosInstance.get('/auth/me');
-        setUser(res.data);
-        localStorage.setItem('lms_user', JSON.stringify(res.data));
+        const userData = res.data;
+        setUser(userData);
+        localStorage.setItem('lms_user', JSON.stringify(userData));
       } catch (error) {
         console.error("Failed to refresh user", error);
       }

@@ -81,8 +81,8 @@ const ArticleDetail = () => {
     try {
       const res = await summaryMutation.mutateAsync(article._id);
 
-      const summaryText = res?.data?.summary || res?.summary || res?.data?.data?.summary || '';
-      const cached = res?.data?.cached ?? res?.cached ?? false;
+      const summaryText = res?.summary || '';
+      const cached = res?.cached ?? false;
 
       if (isInvalidAiText(summaryText)) {
         setSummary('');
@@ -102,8 +102,10 @@ const ArticleDetail = () => {
         toast.success(cached ? 'AI Summary loaded from cache!' : 'AI Summary generated!');
         
         // UPDATE TOKEN COUNT INSTANTLY
-        if (res?.data?.stats && user) {
-          setUser({ ...user, stats: res.data.stats });
+        if (res?.stats && user) {
+          const updatedUser = { ...user, stats: res.stats };
+          setUser(updatedUser);
+          localStorage.setItem('lms_user', JSON.stringify(updatedUser));
         } else if (!cached) {
           refreshUser();
         }
@@ -130,13 +132,8 @@ const ArticleDetail = () => {
         questionText
       });
 
-      const hintText =
-        res?.data?.hint ||
-        res?.hint ||
-        res?.data?.data?.hint ||
-        res;
-
-      const cached = res?.data?.cached ?? res?.cached ?? false;
+      const hintText = res?.hint || res;
+      const cached = res?.cached ?? false;
 
       if (!hintText || typeof hintText !== 'string') {
         toast.error('Failed to get hint');
@@ -147,8 +144,10 @@ const ArticleDetail = () => {
       toast.success(cached ? 'Hint loaded from cache!' : 'Hint generated!');
       
       // UPDATE TOKEN COUNT INSTANTLY
-      if (res?.data?.stats && user) {
-        setUser({ ...user, stats: res.data.stats });
+      if (res?.stats && user) {
+        const updatedUser = { ...user, stats: res.stats };
+        setUser(updatedUser);
+        localStorage.setItem('lms_user', JSON.stringify(updatedUser));
       } else if (!cached) {
         refreshUser();
       }
@@ -205,8 +204,10 @@ const ArticleDetail = () => {
       });
 
       // UPDATE TOKEN COUNT INSTANTLY (AI evaluation uses tokens)
-      if (res?.data?.stats && user) {
-        setUser({ ...user, stats: res.data.stats });
+      if (res?.stats && user) {
+        const updatedUser = { ...user, stats: res.stats };
+        setUser(updatedUser);
+        localStorage.setItem('lms_user', JSON.stringify(updatedUser));
       } else {
         refreshUser();
       }
