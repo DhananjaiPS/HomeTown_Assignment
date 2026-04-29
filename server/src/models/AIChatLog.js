@@ -6,7 +6,7 @@ const aiChatLogSchema = new mongoose.Schema({
   answer: { type: String, required: true },
   source: {
     type: String,
-    enum: ['cache', 'predefined', 'fuzzy', 'gemini', 'rag_gemini'],
+    enum: ['cache', 'predefined', 'fuzzy', 'gemini', 'rag_gemini', 'predefined_exact', 'predefined_keyword', 'predefined_fuzzy', 'predefined_natural'],
     required: true
   },
   mode: {

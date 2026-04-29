@@ -1,27 +1,66 @@
-# System Design
+# System Design 📐
 
-## Architecture
-The Mini AI LMS uses a Modular Monolith architecture. The backend is separated into functional layers:
-- **Controllers**: Handle HTTP requests and responses only.
-- **Services**: Contain all complex business logic.
-- **Models**: Define the MongoDB schemas and methods.
-- **Middlewares**: Enforce authentication, rate-limiting, and validation.
+A high-level overview of the Mini AI LMS ecosystem and data flows.
 
-## Request Flow
-1. **Client** sends request (e.g., submit assignment).
-2. **Rate Limiter** checks IP request limits.
-3. **Route** directs to appropriate middleware.
-4. **Auth Middleware** verifies JWT.
-5. **Validator** checks payload against Zod schema.
-6. **Controller** calls the **Service**.
-7. **Service** executes logic (e.g., calculate MCQ score, call AI for short answer).
-8. **Service** updates DB and calls **Socket.io** to emit events.
-9. **Controller** formats the response using the `apiResponse` util.
+---
 
-## Real-Time Updates Flow (Socket.IO)
-1. User submits an assignment.
-2. Backend evaluates and saves the score.
-3. Backend emits a `leaderboard:update` event to all connected sockets.
-4. Frontend `useLeaderboard` hook listens for the event.
-5. Frontend invalidates the TanStack query cache `['leaderboard']`.
-6. TanStack automatically refetches the latest leaderboard data in the background and updates the UI seamlessly.
+## 🏗️ High-Level Architecture
+
+```mermaid
+graph TD
+    User((User))
+    LB[Load Balancer / Nginx]
+    FE[React Frontend - Vite]
+    BE[Express Backend]
+    DB[(MongoDB)]
+    Gemini[Google Gemini AI]
+    Socket[Socket.IO Server]
+
+    User <--> FE
+    FE <--> LB
+    LB <--> BE
+    BE <--> DB
+    BE <--> Gemini
+    BE <--> Socket
+    Socket -- Real-time Updates --> FE
+```
+
+---
+
+## 🔄 Core Request Flows
+
+### 1. AI Chatbot Request Flow
+1. User sends a message via `ChatbotWindow`.
+2. Backend receives request and calls `FuzzyService`.
+3. **Stage A**: Check for Exact/Fuzzy match in `PredefinedQA`.
+4. **Stage B**: If no match, `RAGService` retrieves relevant Article chunks from MongoDB.
+5. **Stage C**: Query sent to `Gemini AI` with context.
+6. Response returned, logged in `AIChatLog`, and sent to User.
+
+### 2. Assignment Submission Flow
+1. User submits answers via `ArticleDetail`.
+2. Backend grades MCQs/MSQs instantly.
+3. For **Short Answers**, `AIService` calls Gemini for rubric-based evaluation.
+4. Total score, feedback, and updated `UserStats` are saved to MongoDB.
+5. `Socket.IO` emits a leaderboard update event.
+6. User receives immediate results and AI feedback.
+
+---
+
+## 🗄️ Database Schema Design
+
+| Collection | Description | Key Fields |
+|---|---|---|
+| **Users** | User profiles & stats | email, role, stats (tokens, scores, streak) |
+| **Articles** | Educational content | title, content, aiSummaryCache, createdBy |
+| **Assignments** | Task definitions | articleId, questions (mcq/short_answer) |
+| **Submissions** | User attempts | userId, assignmentId, totalScore, aiEvaluation |
+| **VectorChunks**| RAG knowledge base | articleId, content, embedding (vector) |
+| **PredefinedQA**| FAQ optimization | question, answer, usageCount |
+
+---
+
+## ⚖️ Scalability Tradeoffs
+- **Denormalization**: We store `stats` directly in the `User` document for fast dashboard loading, sacrificing some write consistency for read performance.
+- **Stateless Auth**: JWTs allow us to scale the backend horizontally without session affinity.
+- **Fuzzy Search vs. LLM**: We prioritize local `Fuse.js` matching over Gemini API calls to save costs and reduce latency.

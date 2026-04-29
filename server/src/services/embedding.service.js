@@ -6,8 +6,8 @@ class EmbeddingService {
     this.hasKey = !!env.GEMINI_API_KEY;
     if (this.hasKey) {
       this.genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
-      // gemini-embedding-001 is the standard model in 2026 for general purpose embeddings
-      this.model = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" }, { apiVersion: 'v1beta' });
+      // gemini-embedding-001 is available in the environment
+      this.model = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     }
   }
 
@@ -16,7 +16,6 @@ class EmbeddingService {
    */
   async getEmbedding(text) {
     if (!this.hasKey) {
-      // Mock embedding for development without API key
       return Array.from({ length: 768 }, () => Math.random() - 0.5);
     }
 
@@ -24,9 +23,9 @@ class EmbeddingService {
       const result = await this.model.embedContent(text);
       return result.embedding.values;
     } catch (err) {
-      console.warn('[EmbeddingService] Primary model failed, trying fallback (embedding-001)...');
+      console.warn('[EmbeddingService] Primary model failed, trying fallback (gemini-embedding-2)...');
       try {
-        const fallbackModel = this.genAI.getGenerativeModel({ model: "gemini-embedding-001" });
+        const fallbackModel = this.genAI.getGenerativeModel({ model: "gemini-embedding-2" });
         const result = await fallbackModel.embedContent(text);
         return result.embedding.values;
       } catch (fallbackErr) {

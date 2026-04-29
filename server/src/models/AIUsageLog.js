@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const aiUsageLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  feature: { type: String, enum: ['summarize', 'hint', 'evaluate'], required: true },
+  feature: { type: String, enum: ['summarize', 'hint', 'evaluate', 'evaluation', 'chat', 'viva'], required: true },
   model: { type: String, required: true },
   inputTokens: { type: Number },
   outputTokens: { type: Number },

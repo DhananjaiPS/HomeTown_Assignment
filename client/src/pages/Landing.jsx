@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/layout/Navbar';
-import { Sparkles, Brain, Trophy, ArrowRight, Zap, Shield, BookOpen } from 'lucide-react';
+import { Sparkles, Brain, Trophy, ArrowRight, Zap, Shield, BookOpen, Feather } from 'lucide-react';
+import Features from '../components/ui/Features';
 
 const Landing = () => {
   const { user } = useAuth();
@@ -24,7 +25,7 @@ const Landing = () => {
           />
 
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/80 to-slate-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-450/90 via-slate-900/80 to-slate-550" />
 
           {/* Glow */}
           <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[900px] h-[420px] bg-blue-500/30 blur-3xl rounded-full pointer-events-none" />
@@ -79,49 +80,8 @@ const Landing = () => {
         </section>
 
         {/* FEATURES SECTION */}
-        <section className="py-24 bg-white px-4 sm:px-6 lg:px-8 border-t border-gray-100">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Supercharge your learning workflow</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">Everything you need to consume knowledge faster and retain it longer.</p>
-            </div>
+        <Features />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Feature 1 */}
-              <div className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-                <div className="w-14 h-14 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Zap size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">AI Magic Summaries</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Too long to read? Our custom AI engine extracts the most critical information from any article instantly, saving you hours of reading time.
-                </p>
-              </div>
-
-              {/* Feature 2 */}
-              <div className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-                <div className="w-14 h-14 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Brain size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Intelligent Hints</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Stuck on a tricky assignment question? Ask the AI for a gentle nudge. It guides you to the answer without solving it for you.
-                </p>
-              </div>
-
-              {/* Feature 3 */}
-              <div className="p-8 rounded-2xl bg-gray-50 border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
-                <div className="w-14 h-14 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <Trophy size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Global Leaderboard</h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Compete with learners worldwide. Climb the ranks by maintaining high accuracy and completing assignments efficiently.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* FOOTER SECTION */}

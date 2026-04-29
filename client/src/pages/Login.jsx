@@ -29,7 +29,7 @@ const Login = () => {
     try {
       await login(data.email, data.password);
       toast.success('Logged in successfully');
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       toast.error(error.message || 'Failed to login');
     } finally {
@@ -47,43 +47,43 @@ const Login = () => {
           <h1 className="text-2xl font-bold">Welcome Back</h1>
           <p className="text-gray-500 mt-2">Login to your LMS account</p>
         </div>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
-            <input 
-              {...register('email')} 
+            <input
+              {...register('email')}
               className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-primary outline-none ${errors.email ? 'border-red-500' : 'border-border'}`}
               placeholder="you@example.com"
             />
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
-            <input 
+            <input
               type="password"
-              {...register('password')} 
+              {...register('password')}
               className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-primary outline-none ${errors.password ? 'border-red-500' : 'border-border'}`}
               placeholder="••••••••"
             />
             {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-primary hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors flex justify-center items-center h-10"
           >
             {loading ? <div className="loader w-5 h-5 border-2 border-t-white"></div> : 'Login'}
           </button>
         </form>
-        
+
         <div className="mt-6 text-center text-sm text-gray-500">
           Don't have an account? <Link to="/signup" className="text-primary hover:underline font-medium">Sign up</Link>
         </div>
         <div className="mt-4 text-center text-xs text-gray-400">
-          Demo: admin@lms.com / Admin@123 <br/>
+          Demo: admin@lms.com / Admin@123 <br />
           user@lms.com / User@123
         </div>
       </div>

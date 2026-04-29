@@ -11,8 +11,8 @@ const ragService = require('./rag.service');
 const personalizationService = require('./personalization.service');
 const VivaSession = require('../models/VivaSession');
 
-const MODEL_NAME = 'gemini-2.5-flash';
-const FALLBACK_MODEL_NAME = 'gemini-2.0-flash';
+const MODEL_NAME = 'gemini-2.0-flash';
+const FALLBACK_MODEL_NAME = 'gemini-flash-lite-latest';
 
 class AIService {
   constructor() {
@@ -153,11 +153,21 @@ User Question: ${message}
       return { answer: text, source, confidence: 0.95, mode, usedRAG, stats: updatedUser.stats };
 
     } catch (err) {
-      if (err.message.includes('503') && !useFallback) {
+      if ((err.message.includes('503') || err.message.includes('429')) && !useFallback) {
+        console.log(`🔄 Quota/Busy error. Retrying with ${FALLBACK_MODEL_NAME}...`);
         return this.chat(userId, message, articleId, assignmentId, mode, true);
       }
 
       console.error(`[Gemini Error in chat - ${currentModelName}]:`, err);
+
+      if (err.message.includes('429') || err.message.includes('quota')) {
+        return {
+          answer: "⏳ Quota Exceeded: You've hit the Gemini API free tier limit (20 requests per day). I've tried multiple models but all are exhausted. Please try again after some time or use my predefined knowledge base!",
+          source: 'error',
+          isError: true,
+          mode
+        };
+      }
 
       // Handle Leaked Key / Forbidden error
       if (err.message.includes('403') || err.message.includes('Forbidden')) {

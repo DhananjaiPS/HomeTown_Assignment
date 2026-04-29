@@ -1,53 +1,57 @@
-# Backend Architecture & Implementation Details
+# Backend Architecture 🏗️
 
-This document provides a deep dive into the Node.js backend architecture. It covers our schema design, API structure, difficulties encountered, and our highly scalable AI pipeline.
+The Mini AI LMS backend is a robust Node.js application built with a focus on modularity, scalability, and seamless AI integration.
 
-## 1. Project Demand vs. Our Solution
-**The Demand:** Build a secure Node.js/Express backend with MongoDB to handle Users, Articles, Assignments, and Submissions. It must rank users globally and utilize AI to generate hints, summarize texts, and evaluate subjective questions automatically.
-**Our Solution:** We constructed a modular Model-Route-Controller-Service (MRCS) architecture. We implemented JWT authentication, robust Zod input validation, an Mongoose Aggregation pipeline for leaderboards, and an extremely sophisticated AI Service wrapper around Google Gemini with automated fallback logic and token-cost reduction layers.
+---
 
-## 2. Folder Structure & Purpose
+## 🏗️ Core Architecture: Service-Oriented Pattern
+We follow a strict **Controller-Service-Model** pattern to separate concerns:
+1. **Routes**: Define endpoints and apply middleware.
+2. **Controllers**: Handle HTTP requests, extract data, and call appropriate services.
+3. **Services**: Contain the core business logic, AI interactions, and complex database queries.
+4. **Models**: Define data structure using Mongoose schemas.
 
-### `/src/models`
-- **Purpose:** Mongoose Database Schemas.
-- **Why it's needed:** Defines the NoSQL structure and relationships.
-- **Highlights:** 
-  - `User.js`: Tracks learning metrics (`stats`), gamification (`badges`, `streaks`), and AI token quotas.
-  - `Article.js` & `Assignment.js`: Linked via references (`ObjectId`). Assignments contain deeply nested schemas for various question types (MCQ, Short Answer).
-  - `AIUsageLog.js`: An audit log to strictly track API input/output tokens per user per feature.
+---
 
-### `/src/routes` & `/src/controllers`
-- **Purpose:** API routing and HTTP request/response handling.
-- **Why it's needed:** Separates network-level logic (Status codes, JSON parsing) from business logic.
-- **Highlights:** `assignment.controller.js` and `ai.controller.js` are kept extremely thin, strictly delegating complex work to the Service layer.
+## 🔐 Security & Auth Flow
+- **JWT Authentication**: Secure stateless authentication using JSON Web Tokens.
+- **RBAC (Role-Based Access Control)**: Middleware (`authorize`) ensures only specific roles (Admin, Author, Learner) can access certain routes.
+- **Validation**: Every request is validated against **Zod** schemas before reaching the controller, ensuring data integrity.
+- **Security Headers**: Integrated with **Helmet** and **CORS** for web security.
 
-### `/src/services`
-- **Purpose:** Pure business logic.
-- **Why it's needed:** Ensures code is reusable and testable without needing a fake HTTP request.
-- **Highlights:** 
-  - `ai.service.js`: The powerhouse of the application. It handles Google Gemini API calls. It includes automated token tracking, error fallback generation, and context building.
+---
 
-### `/src/middlewares` & `/src/validators`
-- **Purpose:** Security and data integrity.
-- **Highlights:** `auth.middleware.js` verifies JWTs and intercepts unauthorized roles. `*.validator.js` uses Zod to ensure the database is protected from malformed payload injections.
+## 🤖 AI Logic & Optimization
 
-## 3. Difficulties Faced & Overcome
+### Gemini AI Integration
+The system integrates with **Google Gemini 1.5/2.0 Flash** for:
+- Summarizing articles.
+- Evaluating short answers with rubric-based scoring.
+- Generating context-aware hints.
+- Powering the adaptive Viva and Mentor sessions.
 
-**Difficulty 1: Unpredictable AI Formatting**
-- *Problem:* Asking the AI to evaluate a short answer text returned a raw paragraph, which was impossible to parse and store in the DB structurally (e.g. Score vs Feedback).
-- *Solution:* We heavily utilized Gemini's `responseMimeType: 'application/json'` configuration and strictly enforced a JSON schema in the prompt. This forces the AI to reply with a parseable `{ "score": X, "feedback": "Y" }` object every time, allowing seamless DB storage.
+### Chatbot Optimization (The Efficiency Engine)
+To minimize API costs and latency, we use a **Multi-Stage Matching Flow**:
+1. **Normalization**: Cleaning user input (removing noise, filler words).
+2. **Exact/Keyword Match**: Checking `PredefinedQA` for instant matches.
+3. **Fuzzy Matching**: Using `Fuse.js` and `Natural` NLP to find similar questions in the database.
+4. **RAG (Retrieval-Augmented Generation)**: If no match is found, we retrieve relevant article chunks from MongoDB and send them to Gemini for a grounded response.
+5. **Caching**: AI summaries and responses are cached to avoid redundant calls.
 
-**Difficulty 2: The ES Module Scope Crash (`node-summary`)**
-- *Problem:* We attempted to use the popular `node-summary` package to reduce AI token costs. However, the package was broken on modern Node.js versions due to a mixture of CommonJS and raw ES6 `import` statements, crashing our server with `require is not defined in ES module scope`.
-- *Solution:* We completely removed the broken dependency and built our own custom NLP summarizer natively using the `natural` library. It tokenizes the document, computes TF-IDF weights, and cleanly slices the top 20% most critical sentences using pure math, bypassing the bug entirely.
+---
 
-## 4. Backend Optimizations & Scalability
+## 📊 Real-Time Features
+- **Socket.IO**: Used for real-time leaderboard updates. When a student submits an assignment, the system calculates the impact and emits an event to all connected clients.
+- **Activity Logging**: Every major action (Article created, Assignment submitted) is logged to generate a personalized activity feed.
 
-- **Local Extractive Summarization (80% Cost Reduction):**
-  - *The Optimization:* Sending a 10,000-word article to an LLM for summarization consumes massive amounts of expensive tokens. Before calling Gemini, our `_localSummarize()` method uses TF-IDF to locally extract the top 3-5 most critical sentences. We then pass *only* this tiny extracted chunk to Gemini to polish into a human-readable paragraph. This saves ~80% of API token bandwidth and slashes latency.
+---
 
-- **Automated AI Fallback Layers:**
-  - *The Optimization:* Free AI models are highly volatile. If `gemini-2.5-flash` returns a `503 Service Unavailable` due to high demand, our `ai.service.js` catches the error and **automatically retries the exact same prompt using a fallback model** (`gemini-1.5-flash-latest`). If both fail, it returns a safe UI-friendly string rather than crashing.
+## 📈 Leaderboard & Stats
+- **Aggregation**: User stats (Total Score, Articles Completed) are denormalized in the `User` model for fast reading, but recalculated/validated during submissions.
+- **Streaks**: Automated logic calculates daily learning streaks and rewards consistency.
 
-- **Aggregation Pipeline Leaderboard:**
-  - *The Optimization:* Instead of running a cron job or constantly updating a monolithic "rank" field, the leaderboard is generated on-the-fly using MongoDB's `$project` and `$sort` aggregations, dynamically weighting `scorePercentage` against `completionRate`. This ensures real-time accuracy and zero stale data at massive scale.
+---
+
+## 🛠️ Error Handling & Logging
+- **Global Error Handler**: A centralized middleware catches all errors and returns standardized JSON responses.
+- **Pino Logger**: High-performance logging with `pino-http` for production-grade observability and debugging.
