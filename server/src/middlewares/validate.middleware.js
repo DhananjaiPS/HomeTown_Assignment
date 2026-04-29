@@ -13,10 +13,12 @@ const validate = (schema) => (req, res, next) => {
     next();
   } catch (err) {
     if (err instanceof ZodError) {
+      console.log('--- VALIDATION FAILED ---');
+      console.log(JSON.stringify(err.flatten(), null, 2));
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
-        errors: err.errors.map(e => `${e.path.join('.')}: ${e.message}`)
+        errors: err.flatten()
       });
     }
     next(err);

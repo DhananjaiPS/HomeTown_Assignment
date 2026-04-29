@@ -38,6 +38,8 @@ const submissionRoutes = require('./routes/submission.routes');
 const aiRoutes = require('./routes/ai.routes');
 const leaderboardRoutes = require('./routes/leaderboard.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const adaptiveRoutes = require('./routes/ai-adaptive.routes');
+const authorRequestRoutes = require('./routes/author-request.routes');
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/articles', articleRoutes);
@@ -46,6 +48,8 @@ app.use('/api/v1/submissions', submissionRoutes);
 app.use('/api/v1/ai', aiRoutes);
 app.use('/api/v1/leaderboard', leaderboardRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/adaptive', adaptiveRoutes);
+app.use('/api/v1/author-requests', authorRequestRoutes);
 
 // Error Handling Middleware (must be last)
 app.use(errorMiddleware);

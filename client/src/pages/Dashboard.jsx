@@ -2,6 +2,9 @@ import React from 'react';
 import { useDashboard } from '../hooks/useDashboard';
 import { BookOpen, Trophy, Target, Award, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import LearningDNA from '../components/dashboard/LearningDNA';
+import SmartQuickLinks from '../components/dashboard/SmartQuickLinks';
+import AuthorRequestWidget from '../components/dashboard/AuthorRequestWidget';
 
 const StatCard = ({ title, value, icon, colorClass }) => (
   <div className="bg-card p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
@@ -31,36 +34,37 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Avg. Score" 
-          value={`${stats.totalMaxScore > 0 ? ((stats.totalScore / stats.totalMaxScore) * 100).toFixed(1) : 0}%`} 
-          icon={<Target size={24} className="text-blue-600" />} 
-          colorClass="bg-blue-100" 
+        <StatCard
+          title="Avg. Score"
+          value={`${stats.totalMaxScore > 0 ? ((stats.totalScore / stats.totalMaxScore) * 100).toFixed(1) : 0}%`}
+          icon={<Target size={24} className="text-blue-600" />}
+          colorClass="bg-blue-100"
         />
-        <StatCard 
-          title="Assignments Done" 
-          value={stats.assignmentsAttempted} 
-          icon={<BookOpen size={24} className="text-green-600" />} 
-          colorClass="bg-green-100" 
+        <StatCard
+          title="Assignments Done"
+          value={stats.assignmentsAttempted}
+          icon={<BookOpen size={24} className="text-green-600" />}
+          colorClass="bg-green-100"
         />
-        <StatCard 
-          title="Current Streak" 
-          value={`${stats.currentStreak} Days`} 
-          icon={<Clock size={24} className="text-orange-600" />} 
-          colorClass="bg-orange-100" 
+        <StatCard
+          title="Current Streak"
+          value={`${stats.currentStreak} Days`}
+          icon={<Clock size={24} className="text-orange-600" />}
+          colorClass="bg-orange-100"
         />
-        <StatCard 
-          title="Badges Earned" 
-          value={badges.length} 
-          icon={<Award size={24} className="text-purple-600" />} 
-          colorClass="bg-purple-100" 
+        <StatCard
+          title="Badges Earned"
+          value={badges.length}
+          icon={<Award size={24} className="text-purple-600" />}
+          colorClass="bg-purple-100"
         />
       </div>
-
+      {/* <LearningDNA />
+      <SmartQuickLinks /> */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><BookOpen size={20}/> Recent Submissions</h2>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><BookOpen size={20} /> Recent Submissions</h2>
             {recentSubmissions.length === 0 ? (
               <p className="text-gray-500">No submissions yet.</p>
             ) : (
@@ -82,14 +86,16 @@ const Dashboard = () => {
               </div>
             )}
             <div className="mt-4">
-               <Link to="/articles" className="text-primary hover:underline text-sm font-medium">Browse more articles &rarr;</Link>
+              <Link to="/articles" className="text-primary hover:underline text-sm font-medium">Browse more articles &rarr;</Link>
             </div>
           </div>
         </div>
 
         <div className="space-y-6">
+          <AuthorRequestWidget />
+
           <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Award size={20}/> My Badges</h2>
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Award size={20} /> My Badges</h2>
             {badges.length === 0 ? (
               <p className="text-gray-500 text-sm">Earn badges by completing assignments and keeping up your streak!</p>
             ) : (

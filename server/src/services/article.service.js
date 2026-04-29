@@ -13,6 +13,11 @@ class ArticleService {
       filter.status = 'published';
     }
 
+    // Authors only see their own articles in the admin list
+    if (userRole === 'author' && query.admin === 'true') {
+      filter.createdBy = query.userId;
+    }
+
     if (query.search) {
       filter.$text = { $search: query.search };
     }
@@ -51,23 +56,54 @@ class ArticleService {
   }
 
   async createArticle(data, userId) {
-    return await Article.create({ ...data, createdBy: userId });
-  }
+    const article = await Article.create({ ...data, createdBy: userId });
 
-  async updateArticle(id, data) {
-    const article = await Article.findByIdAndUpdate(id, data, { new: true, runValidators: true });
-    if (!article) {
-      throw new Error('Article not found');
-    }
+    await Activity.create({
+      userId,
+      type: 'article_created',
+      title: 'Created an Article',
+      description: `You created a new article: ${article.title}.`,
+      metadata: { articleId: article._id }
+    });
+
     return article;
   }
 
-  async deleteArticle(id) {
-    const article = await Article.findByIdAndDelete(id);
+  async updateArticle(id, data, userId, userRole) {
+    const article = await Article.findById(id);
     if (!article) {
       throw new Error('Article not found');
     }
+
+    if (userRole === 'author' && article.createdBy.toString() !== userId.toString()) {
+      throw new Error('Not authorized to update this article');
+    }
+
+    article.set(data);
+    await article.save();
+
+    await Activity.create({
+      userId,
+      type: 'article_updated',
+      title: 'Updated an Article',
+      description: `You updated the article: ${article.title}.`,
+      metadata: { articleId: article._id }
+    });
+
     return article;
+  }
+
+  async deleteArticle(id, userId, userRole) {
+    const article = await Article.findById(id);
+    if (!article) {
+      throw new Error('Article not found');
+    }
+
+    if (userRole === 'author' && article.createdBy.toString() !== userId.toString()) {
+      throw new Error('Not authorized to delete this article');
+    }
+
+    return await Article.findByIdAndDelete(id);
   }
 
   async updateProgress(userId, articleId, data) {

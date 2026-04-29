@@ -24,7 +24,7 @@ export const AdminRoute = ({ children }) => {
     return <div className="min-h-screen flex items-center justify-center"><div className="loader"></div></div>;
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'author')) {
     return <Navigate to="/dashboard" replace />;
   }
 

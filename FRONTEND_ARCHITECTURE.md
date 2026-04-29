@@ -42,15 +42,19 @@ This document provides an in-depth breakdown of the Frontend architecture for th
 ## 3. Difficulties Faced & Overcome
 
 **Difficulty 1: Markdown Rendering from AI**
+
 - *Problem:* Gemini AI originally returned summaries containing markdown syntax (`**bold**` or `* bullets`), which rendered ugly raw text in our standard `<div>`.
 - *Solution:* Instead of installing heavy markdown-parsing libraries that bloat the bundle size, we engineered the AI prompt in the backend to explicitly forbid markdown, forcing it to return perfectly structured plain-text paragraphs. The frontend then utilizes `whitespace-pre-wrap` in Tailwind to perfectly align the text.
 
 **Difficulty 2: Handling AI API Failures Gracefully**
+
 - *Problem:* Free AI APIs like Gemini often throw `503 Service Unavailable` or `429 Too Many Requests`. This initially crashed the frontend loading states.
 - *Solution:* We built a highly robust error-catching system. If the backend detects a 503, it sends a specific emoji/string (like ⏳). The frontend intercepts this in `ArticleDetail.jsx`, skips the standard "Failed" error, and displays a friendly user-facing toast explaining that the AI is under high demand and they should try again later.
 
 ## 4. Frontend Optimizations & Scalability
 
 - **API Caching:** By using TanStack query, repeated visits to the same article instantly load from local memory while fetching fresh data in the background.
+
 - **Optimistic UI:** When a user clicks "Generate Hint", the button immediately enters a disabled spinner state to prevent double-submissions, ensuring a snappy feel.
-- **Bundle Size:** We relied heavily on native CSS features and `lucide-react` for SVG icons rather than pulling in massive component libraries like Material UI, ensuring the application loads instantly even on slow 3G networks.
+
+- **Bundle Size:** We relied heavily on native CSS features and `lucide-react` for SVG icons rather than pulling in massive component libraries like Material UI, ensuring the application loads instantly even on slow 3G networks

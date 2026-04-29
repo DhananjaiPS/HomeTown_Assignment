@@ -1,11 +1,16 @@
 const Assignment = require('../models/Assignment');
 const Article = require('../models/Article');
 const Submission = require('../models/Submission');
+const Activity = require('../models/Activity');
 
 class AssignmentService {
-  async getAllAssignmentsAdmin() {
+  async getAllAssignmentsAdmin(userId, userRole) {
+    const filter = {};
+    if (userRole === 'author') {
+      filter.createdBy = userId;
+    }
     // Populate articleId to get the title
-    const assignments = await Assignment.find()
+    const assignments = await Assignment.find(filter)
       .populate('articleId', 'title')
       .sort({ createdAt: -1 });
     return assignments;
@@ -24,7 +29,7 @@ class AssignmentService {
     return assignment;
   }
 
-  async createAssignment(data) {
+  async createAssignment(data, userId) {
     const article = await Article.findById(data.articleId);
     if (!article) {
       throw new Error('Article not found');
@@ -36,21 +41,51 @@ class AssignmentService {
       throw new Error('Assignment already exists for this article');
     }
 
-    return await Assignment.create(data);
-  }
+    const assignment = await Assignment.create({ ...data, createdBy: userId });
 
-  async updateAssignment(id, data) {
-    const assignment = await Assignment.findByIdAndUpdate(id, data, { new: true, runValidators: true });
-    if (!assignment) {
-      throw new Error('Assignment not found');
-    }
+    await Activity.create({
+      userId,
+      type: 'assignment_created',
+      title: 'Created an Assignment',
+      description: `You created a new assignment: ${assignment.title}.`,
+      metadata: { assignmentId: assignment._id }
+    });
+
     return assignment;
   }
 
-  async deleteAssignment(id) {
+  async updateAssignment(id, data, userId, userRole) {
     const assignment = await Assignment.findById(id);
     if (!assignment) {
       throw new Error('Assignment not found');
+    }
+
+    if (userRole === 'author' && assignment.createdBy.toString() !== userId.toString()) {
+      throw new Error('Not authorized to update this assignment');
+    }
+
+    assignment.set(data);
+    await assignment.save();
+
+    await Activity.create({
+      userId,
+      type: 'assignment_updated',
+      title: 'Updated an Assignment',
+      description: `You updated the assignment: ${assignment.title}.`,
+      metadata: { assignmentId: assignment._id }
+    });
+
+    return assignment;
+  }
+
+  async deleteAssignment(id, userId, userRole) {
+    const assignment = await Assignment.findById(id);
+    if (!assignment) {
+      throw new Error('Assignment not found');
+    }
+
+    if (userRole === 'author' && assignment.createdBy.toString() !== userId.toString()) {
+      throw new Error('Not authorized to delete this assignment');
     }
 
     // Check for existing submissions

@@ -10,11 +10,11 @@ router.use(protect);
 
 router.get('/article/:articleId', assignmentController.getAssignmentByArticle);
 
-// Admin only routes
-router.get('/admin', authorize('admin'), assignmentController.getAllAssignmentsAdmin);
-router.get('/:id', authorize('admin'), assignmentController.getAssignmentById);
-router.post('/', authorize('admin'), validate(createAssignmentSchema), assignmentController.createAssignment);
-router.put('/:id', authorize('admin'), validate(updateAssignmentSchema), assignmentController.updateAssignment);
-router.delete('/:id', authorize('admin'), assignmentController.deleteAssignment);
+// Admin & Author routes
+router.get('/admin', authorize('admin', 'author'), assignmentController.getAllAssignmentsAdmin);
+router.get('/:id', authorize('admin', 'author'), assignmentController.getAssignmentById);
+router.post('/', authorize('admin', 'author'), validate(createAssignmentSchema), assignmentController.createAssignment);
+router.put('/:id', authorize('admin', 'author'), validate(updateAssignmentSchema), assignmentController.updateAssignment);
+router.delete('/:id', authorize('admin', 'author'), assignmentController.deleteAssignment);
 
 module.exports = router;

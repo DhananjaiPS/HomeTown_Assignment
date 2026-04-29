@@ -47,9 +47,9 @@ const Navbar = () => {
           <User size={18} /> <span>Profile</span>
         </Link>
 
-        {user?.role === 'admin' && (
+        {(user?.role === 'admin' || user?.role === 'author') && (
           <Link to="/admin" onClick={closeMenu} className="nav-link text-orange-500">
-            <Shield size={18} /> <span>Admin</span>
+            <Shield size={18} /> <span>{user.role === 'admin' ? 'Admin' : 'Studio'}</span>
           </Link>
         )}
       </>

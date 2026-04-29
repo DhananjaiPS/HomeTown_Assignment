@@ -25,7 +25,7 @@ const AdminAssignments = () => {
   const { data: articlesData, isLoading: isArticlesLoading } = useQuery({
     queryKey: ['admin-articles-list'],
     queryFn: async () => {
-      const res = await axiosInstance.get('/articles?limit=50');
+      const res = await axiosInstance.get('/articles?limit=50&admin=true');
       return res.data;
     },
   });
@@ -49,6 +49,7 @@ const AdminAssignments = () => {
 
   const createMutation = useMutation({
     mutationFn: async (newAssignment) => {
+      console.log("SUBMIT PAYLOAD (CREATE):", newAssignment);
       const res = await axiosInstance.post('/assignments', newAssignment);
       return res.data;
     },
@@ -62,12 +63,15 @@ const AdminAssignments = () => {
       setQuestions([]);
     },
     onError: (err) => {
+      console.log("FULL ERROR (CREATE):", err);
+      console.log("BACKEND ERROR (CREATE):", err.response?.data);
       toast.error(err?.response?.data?.message || err?.message || 'Failed to create assignment');
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
+      console.log("SUBMIT PAYLOAD (UPDATE):", data);
       const res = await axiosInstance.put(`/assignments/${id}`, data);
       return res.data;
     },
@@ -81,6 +85,8 @@ const AdminAssignments = () => {
       setQuestions([]);
     },
     onError: (err) => {
+      console.log("FULL ERROR (UPDATE):", err);
+      console.log("BACKEND ERROR (UPDATE):", err.response?.data);
       toast.error(err?.response?.data?.message || err?.message || 'Failed to update assignment');
     },
   });

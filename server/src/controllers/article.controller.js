@@ -3,7 +3,11 @@ const { sendResponse } = require('../utils/apiResponse');
 
 exports.getArticles = async (req, res, next) => {
   try {
-    const data = await articleService.getArticles(req.query, req.user ? req.user.role : 'learner');
+    const query = { ...req.query };
+    if (req.user) {
+      query.userId = req.user._id;
+    }
+    const data = await articleService.getArticles(query, req.user ? req.user.role : 'learner');
     sendResponse(res, 200, 'Articles fetched successfully', data);
   } catch (error) {
     next(error);
@@ -33,11 +37,11 @@ exports.createArticle = async (req, res, next) => {
 
 exports.updateArticle = async (req, res, next) => {
   try {
-    const data = await articleService.updateArticle(req.params.id, req.body);
+    const data = await articleService.updateArticle(req.params.id, req.body, req.user._id, req.user.role);
     sendResponse(res, 200, 'Article updated successfully', data);
   } catch (error) {
-    if (error.message === 'Article not found') {
-      return res.status(404).json({ success: false, message: 'Article not found' });
+    if (error.message === 'Article not found' || error.message === 'Not authorized to update this article') {
+      return res.status(error.message === 'Article not found' ? 404 : 403).json({ success: false, message: error.message });
     }
     next(error);
   }
@@ -45,11 +49,11 @@ exports.updateArticle = async (req, res, next) => {
 
 exports.deleteArticle = async (req, res, next) => {
   try {
-    const data = await articleService.deleteArticle(req.params.id);
+    const data = await articleService.deleteArticle(req.params.id, req.user._id, req.user.role);
     sendResponse(res, 200, 'Article deleted successfully', data);
   } catch (error) {
-    if (error.message === 'Article not found') {
-      return res.status(404).json({ success: false, message: 'Article not found' });
+    if (error.message === 'Article not found' || error.message === 'Not authorized to delete this article') {
+      return res.status(error.message === 'Article not found' ? 404 : 403).json({ success: false, message: error.message });
     }
     next(error);
   }

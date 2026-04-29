@@ -111,22 +111,34 @@ class SubmissionService {
     user.stats.assignmentsAttempted += 1;
     user.stats.totalScore += totalScore;
     user.stats.totalMaxScore += totalMaxScore;
-    // update streak logic simply here for now
-    const lastActive = new Date(user.lastActiveAt);
+    // Update streak logic using lastSubmissionAt and midnight boundaries
     const today = new Date();
-    if (lastActive.toDateString() !== today.toDateString()) {
-      const diffTime = Math.abs(today - lastActive);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    today.setHours(0, 0, 0, 0);
+
+    if (!user.stats.lastSubmissionAt) {
+      user.stats.currentStreak = 1;
+      if (user.stats.longestStreak === 0) user.stats.longestStreak = 1;
+    } else {
+      const lastSub = new Date(user.stats.lastSubmissionAt);
+      lastSub.setHours(0, 0, 0, 0);
+      
+      const diffTime = today.getTime() - lastSub.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+      
       if (diffDays === 1) {
         user.stats.currentStreak += 1;
         if (user.stats.currentStreak > user.stats.longestStreak) {
           user.stats.longestStreak = user.stats.currentStreak;
         }
-      } else {
+      } else if (diffDays > 1) {
         user.stats.currentStreak = 1;
       }
+      // If diffDays === 0 (same day), do nothing to streak
     }
+    
+    user.stats.lastSubmissionAt = Date.now();
     user.lastActiveAt = Date.now();
+    user.markModified('stats');
     await user.save();
 
     await Activity.create({

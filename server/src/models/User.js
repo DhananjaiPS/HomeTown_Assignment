@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please add a valid email']
   },
   passwordHash: { type: String, required: [true, 'Please add a password'], select: false },
-  role: { type: String, enum: ['learner', 'admin'], default: 'learner' },
+  role: { type: String, enum: ['learner', 'author', 'admin'], default: 'learner' },
   profile: {
     avatar: { type: String, default: '' },
     bio: { type: String, default: '' }
@@ -23,7 +23,19 @@ const userSchema = new mongoose.Schema({
     currentStreak: { type: Number, default: 0 },
     longestStreak: { type: Number, default: 0 },
     aiTokensUsed: { type: Number, default: 0 },
-    aiTokensLimit: { type: Number, default: function() { return this.role === 'admin' ? 100000 : 10000; } }
+    aiTokensLimit: { type: Number, default: function() { return this.role === 'admin' ? 100000 : 10000; } },
+    lastSubmissionAt: { type: Date },
+    cognitiveLoadIndex: { type: Number, default: 0 },
+    careerReadiness: {
+      dsa: { type: Number, default: 0 },
+      systemDesign: { type: Number, default: 0 },
+      coreSubjects: { type: Number, default: 0 }
+    },
+    learningDNA: {
+      strengths: { type: [String], default: [] },
+      weaknesses: { type: [String], default: [] },
+      retentionRate: { type: Number, default: 100 }
+    }
   },
   badges: [{
     name: { type: String },

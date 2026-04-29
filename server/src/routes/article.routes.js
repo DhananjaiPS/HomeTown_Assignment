@@ -14,9 +14,9 @@ router.get('/:slug', articleController.getArticleBySlug);
 router.get('/:id/ai-summary', articleController.getAiSummary);
 router.post('/:id/progress', validate(progressSchema), articleController.updateProgress);
 
-// Admin only routes
-router.post('/', authorize('admin'), validate(createArticleSchema), articleController.createArticle);
-router.put('/:id', authorize('admin'), validate(updateArticleSchema), articleController.updateArticle);
-router.delete('/:id', authorize('admin'), articleController.deleteArticle);
+// Admin & Author routes
+router.post('/', authorize('admin', 'author'), validate(createArticleSchema), articleController.createArticle);
+router.put('/:id', authorize('admin', 'author'), validate(updateArticleSchema), articleController.updateArticle);
+router.delete('/:id', authorize('admin', 'author'), articleController.deleteArticle);
 
 module.exports = router;

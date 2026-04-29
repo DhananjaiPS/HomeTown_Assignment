@@ -36,7 +36,8 @@ const assignmentSchema = new mongoose.Schema({
   totalMarks: { type: Number, required: true },
   maxAttempts: { type: Number, default: 3 },
   dueDate: { type: Date },
-  status: { type: String, enum: ['active', 'inactive'], default: 'active' }
+  status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
 // Indexes

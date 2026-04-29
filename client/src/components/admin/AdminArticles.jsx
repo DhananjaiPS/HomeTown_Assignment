@@ -14,7 +14,7 @@ const AdminArticles = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['admin-articles', page],
     queryFn: async () => {
-      const res = await axiosInstance.get(`/articles?page=${page}&limit=10`);
+      const res = await axiosInstance.get(`/articles?page=${page}&limit=10&admin=true`);
       return res.data;
     }
   });

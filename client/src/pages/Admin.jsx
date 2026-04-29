@@ -3,6 +3,8 @@ import { useAdminDashboard } from '../hooks/useDashboard';
 import { Users, FileText, FileQuestion, UploadCloud } from 'lucide-react';
 import AdminArticles from '../components/admin/AdminArticles';
 import AdminAssignments from '../components/admin/AdminAssignments';
+import AdminAuthorRequests from '../components/admin/AdminAuthorRequests';
+import { useAuth } from '../context/AuthContext';
 
 const StatCard = ({ title, value, icon, colorClass }) => (
   <div className="bg-card p-6 rounded-xl border border-border shadow-sm flex items-center gap-4">
@@ -55,26 +57,42 @@ const AdminDashboard = () => {
 };
 
 const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+  const isAuthor = user?.role === 'author';
+  
+  // Define available tabs based on role
+  const tabs = [];
+  if (isAdmin) tabs.push('dashboard');
+  tabs.push('articles', 'assignments');
+  if (isAdmin) tabs.push('requests');
+
+  const [activeTab, setActiveTab] = useState(isAdmin ? 'dashboard' : 'articles');
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Admin Portal</h1>
-        <p className="text-gray-500 mt-1">Manage platform content and analytics.</p>
+        <h1 className="text-3xl font-bold text-foreground">
+          {isAdmin ? 'Admin Portal' : 'Author Studio'}
+        </h1>
+        <p className="text-gray-500 mt-1">
+          {isAdmin ? 'Manage platform content and analytics.' : 'Create and manage your educational content.'}
+        </p>
       </div>
 
-      <div className="flex border-b border-border">
-        {['dashboard', 'articles', 'assignments'].map((tab) => (
+      <div className="flex border-b border-border overflow-x-auto">
+        {tabs.map((tab) => (
           <button
             key={tab}
-            className={`px-4 py-2 font-medium ${activeTab === tab
+            className={`px-4 py-2 font-medium whitespace-nowrap ${activeTab === tab
               ? 'border-b-2 border-primary text-primary'
               : 'text-gray-500 hover:text-gray-700'
               }`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab === 'dashboard' ? 'Analytics' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === 'dashboard' ? 'Analytics' : 
+             tab === 'requests' ? 'Author Requests' :
+             tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
       </div>
@@ -83,6 +101,7 @@ const AdminPanel = () => {
         {activeTab === 'dashboard' && <AdminDashboard />}
         {activeTab === 'articles' && <AdminArticles />}
         {activeTab === 'assignments' && <AdminAssignments />}
+        {activeTab === 'requests' && <AdminAuthorRequests />}
       </div>
     </div>
   );

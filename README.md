@@ -9,7 +9,7 @@ A robust, full-stack, production-ready Learning Management System that leverages
 - **Security & Auth**: JWT, bcrypt, Helmet, express-rate-limit, Zod for validation.
 
 ## Features
-- **User Roles**: Learner and Admin dashboards.
+- **User Roles**: Learner and Admin dashboards
 - **AI Tools**: Summarize articles, get hints for questions, and subjective answer grading.
 - **AI Optimization Engine**: Built-in TF-IDF local sentence extraction using `natural` to reduce LLM token consumption by 80%.
 - **Token Quota Tracking**: Real-time DB logging of AI Tokens used vs limits, visible in the Navbar.
