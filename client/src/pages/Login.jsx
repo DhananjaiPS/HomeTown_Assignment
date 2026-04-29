@@ -16,7 +16,7 @@ const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'r@gmail.com',
+      email: 'Admin@gmail.com',
       password: '123456'
     }
   });
