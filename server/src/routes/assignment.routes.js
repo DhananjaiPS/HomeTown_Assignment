@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const assignmentController = require('../controllers/assignment.controller');
 const validate = require('../middlewares/validate.middleware');
-const protect = require('../middlewares/auth.middleware');
-const authorize = require('../middlewares/role.middleware');
+const { protect, authorizeRoles: authorize } = require('../middlewares/auth.middleware');
 const { createAssignmentSchema, updateAssignmentSchema } = require('../validators/assignment.validator');
 
 router.use(protect);

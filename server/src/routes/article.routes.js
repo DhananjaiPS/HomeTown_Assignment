@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const articleController = require('../controllers/article.controller');
 const validate = require('../middlewares/validate.middleware');
-const protect = require('../middlewares/auth.middleware');
-const authorize = require('../middlewares/role.middleware');
+const { protect, authorizeRoles: authorize } = require('../middlewares/auth.middleware');
 const { createArticleSchema, updateArticleSchema, progressSchema } = require('../validators/article.validator');
 
 // Public or Learner routes (requires auth for some features, but viewing can be restricted based on requirement. We will enforce auth for all.)

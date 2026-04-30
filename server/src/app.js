@@ -39,7 +39,7 @@ const aiRoutes = require('./routes/ai.routes');
 const leaderboardRoutes = require('./routes/leaderboard.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const adaptiveRoutes = require('./routes/ai-adaptive.routes');
-const authorRequestRoutes = require('./routes/author-request.routes');
+const authorRequestRoutes = require('./routes/authorRequest.routes');
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/articles', articleRoutes);

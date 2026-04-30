@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const dashboardController = require('../controllers/dashboard.controller');
-const protect = require('../middlewares/auth.middleware');
-const authorize = require('../middlewares/role.middleware');
+const { protect, authorizeRoles: authorize } = require('../middlewares/auth.middleware');
 
 router.use(protect);
 
