@@ -166,7 +166,7 @@ exports.chatWithMentor = async (req, res) => {
     let reply = "";
     
     if (aiService.hasKey) {
-      const model = aiService.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = aiService.textModels[0];
       const chat = model.startChat({
         history: [
           { role: "user", parts: [{ text: systemPrompt }] },

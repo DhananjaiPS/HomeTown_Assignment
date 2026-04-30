@@ -27,18 +27,22 @@ exports.getHint = async (req, res, next) => {
     }
 
     // 3. Generate hint via AI if not cached
-    const hint = await aiService.generateHint(req.user._id, questionText);
+    const hintResult = await aiService.generateHint(req.user._id, questionText);
+    const hintText = hintResult.hint || '';
 
     // Only cache if it's a successful hint (not a graceful error message)
-    if (!hint.includes('⏳') && !hint.includes('⚠️') && !hint.toLowerCase().includes('failed')) {
-      question.aiHintCache = hint;
-      await assignment.save();
+    if (!hintText.includes('⏳') && !hintText.includes('⚠️') && !hintText.toLowerCase().includes('failed')) {
+      // SDE-3 Optimization: Use atomic update to avoid triggering full document validation (like missing createdBy)
+      await Assignment.updateOne(
+        { _id: assignmentId, 'questions._id': questionId },
+        { $set: { 'questions.$.aiHintCache': hintText } }
+      );
     }
 
     sendResponse(res, 200, 'Hint generated successfully', { 
-      hint: hint.hint,
+      hint: hintText,
       cached: false,
-      stats: hint.stats
+      stats: hintResult.stats
     });
   } catch (error) {
     next(error);

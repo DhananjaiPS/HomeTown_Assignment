@@ -181,7 +181,7 @@ class ArticleService {
       console.log(`5. Saving successful summary to database cache...`);
       article.aiSummaryCache = {
         simpleSummary: result.summary,
-        model: aiService.hasKey ? 'gemini-2.5-flash' : 'mock',
+        model: aiService.hasKey ? 'gemini-2.0-flash' : 'mock',
         generatedAt: Date.now()
       };
       await article.save();

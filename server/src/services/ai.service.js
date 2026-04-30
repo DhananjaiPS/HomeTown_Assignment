@@ -11,8 +11,12 @@ const ragService = require('./rag.service');
 const personalizationService = require('./personalization.service');
 const VivaSession = require('../models/VivaSession');
 
-const MODEL_NAME = 'gemini-2.0-flash';
-const FALLBACK_MODEL_NAME = 'gemini-flash-lite-latest';
+const MODELS = [
+  'gemini-2.0-flash',           // Primary (April 2026 performance model)
+  'gemini-2.5-flash',           // High-throughput 2026 model
+  'gemini-2.5-pro',             // High-reasoning 2026 model
+  'gemini-flash-lite-latest'    // Verified 2026 high-availability model
+];
 
 class AIService {
   constructor() {
@@ -21,23 +25,17 @@ class AIService {
     if (this.hasKey) {
       this.genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY);
 
-      this.textModel = this.genAI.getGenerativeModel({ model: MODEL_NAME });
-      // 2. Initialize fallback model
-      this.fallbackTextModel = this.genAI.getGenerativeModel({ model: FALLBACK_MODEL_NAME });
-
-      this.jsonModel = this.genAI.getGenerativeModel({
-        model: MODEL_NAME,
+      // Initialize all model tiers
+      this.textModels = MODELS.map(name => this.genAI.getGenerativeModel({ model: name }));
+      
+      this.jsonModels = MODELS.map(name => this.genAI.getGenerativeModel({
+        model: name,
         generationConfig: { responseMimeType: 'application/json' },
-      });
-
-      this.fallbackJsonModel = this.genAI.getGenerativeModel({
-        model: FALLBACK_MODEL_NAME,
-        generationConfig: { responseMimeType: 'application/json' },
-      });
+      }));
     }
   }
 
-  async chat(userId, message, articleId, assignmentId, mode = 'normal', useFallback = false) {
+  async chat(userId, message, articleId, assignmentId, mode = 'normal', tier = 0) {
     const startTime = Date.now();
 
     // 1. Normalize Query
@@ -107,8 +105,8 @@ class AIService {
     }
 
     // 5. Call Gemini
-    const currentModelName = useFallback ? FALLBACK_MODEL_NAME : MODEL_NAME;
-    const currentModel = useFallback ? this.fallbackTextModel : this.textModel;
+    const currentModelName = MODELS[tier] || MODELS[0];
+    const currentModel = this.textModels[tier] || this.textModels[0];
 
     if (!this.hasKey) {
       const answer = "Mock AI Answer: This is an advanced system response.";
@@ -153,16 +151,17 @@ User Question: ${message}
       return { answer: text, source, confidence: 0.95, mode, usedRAG, stats: updatedUser.stats };
 
     } catch (err) {
-      if ((err.message.includes('503') || err.message.includes('429')) && !useFallback) {
-        console.log(`🔄 Quota/Busy error. Retrying with ${FALLBACK_MODEL_NAME}...`);
-        return this.chat(userId, message, articleId, assignmentId, mode, true);
+      // 7. Multi-Tier Fallback Logic
+      if ((err.message.includes('503') || err.message.includes('429')) && tier < MODELS.length - 1) {
+        console.log(`🔄 ${currentModelName} failed (Quota/Busy). Retrying with ${MODELS[tier + 1]}...`);
+        return this.chat(userId, message, articleId, assignmentId, mode, tier + 1);
       }
 
       console.error(`[Gemini Error in chat - ${currentModelName}]:`, err);
 
       if (err.message.includes('429') || err.message.includes('quota')) {
         return {
-          answer: "⏳ Quota Exceeded: You've hit the Gemini API free tier limit (20 requests per day). I've tried multiple models but all are exhausted. Please try again after some time or use my predefined knowledge base!",
+          answer: "⏳ Quota Exceeded: You've hit the Gemini API free tier limit for all available models. Please try again after some time or use my predefined knowledge base!",
           source: 'error',
           isError: true,
           mode
@@ -180,7 +179,6 @@ User Question: ${message}
         };
       }
 
-      return { answer: 'Sorry, I am currently unavailable. Please try again later.', source: 'gemini', confidence: 0, mode, usedRAG: false };
     }
   }
 
@@ -294,9 +292,9 @@ User Question: ${message}
     }
   }
 
-  async generateHint(userId, questionText, useFallback = false) {
-    const currentModelName = useFallback ? FALLBACK_MODEL_NAME : MODEL_NAME;
-    const currentModel = useFallback ? this.fallbackTextModel : this.textModel;
+  async generateHint(userId, questionText, tier = 0) {
+    const currentModelName = MODELS[tier] || MODELS[0];
+    const currentModel = this.textModels[tier] || this.textModels[0];
 
     if (!this.hasKey) {
       await this._logUsage(userId, 'hint', currentModelName, true, null, 0, 0);
@@ -333,9 +331,9 @@ ${cleanQuestion}
       console.error(`[Gemini Error in generateHint - ${currentModelName}]:`, err.message);
 
       // 4. AUTOMATIC FALLBACK LOGIC
-      if (err.message.includes('503') && !useFallback) {
-        console.log(`🔄 Google 2.5 servers are busy. Retrying automatically with ${FALLBACK_MODEL_NAME}...`);
-        return this.generateHint(userId, questionText, true);
+      if ((err.message.includes('503') || err.message.includes('429')) && tier < MODELS.length - 1) {
+        console.log(`🔄 ${currentModelName} failed (Quota/Busy). Retrying with ${MODELS[tier + 1]}...`);
+        return this.generateHint(userId, questionText, tier + 1);
       }
 
       await this._logUsage(userId, 'hint', currentModelName, false, err.message, 0, 0);
@@ -383,8 +381,8 @@ ${cleanQuestion}
       };
     }
 
-    const currentModelName = useFallback ? FALLBACK_MODEL_NAME : MODEL_NAME;
-    const currentModel = useFallback ? this.fallbackJsonModel : this.jsonModel;
+    const currentModelName = MODELS[tier] || MODELS[0];
+    const currentModel = this.jsonModels[tier] || this.jsonModels[0];
 
     try {
       const prompt = `
@@ -429,9 +427,9 @@ ${cleanQuestion}
     } catch (err) {
       console.error(`[Gemini Error in evaluateShortAnswer - ${currentModelName}]:`, err.message);
 
-      if (err.message.includes('503') && !useFallback) {
-        console.log(`🔄 Google 2.5 servers are busy. Retrying evaluateShortAnswer automatically with ${FALLBACK_MODEL_NAME}...`);
-        return this.evaluateShortAnswer(userId, questionText, expectedAnswer, rubric, userAnswer, maxMarks, true);
+      if ((err.message.includes('503') || err.message.includes('429')) && tier < MODELS.length - 1) {
+        console.log(`🔄 ${currentModelName} failed (Quota/Busy). Retrying with ${MODELS[tier + 1]}...`);
+        return this.evaluateShortAnswer(userId, questionText, expectedAnswer, rubric, userAnswer, maxMarks, tier + 1);
       }
 
       await this._logUsage(userId, 'evaluation', currentModelName, false, err.message, 0, 0);
@@ -500,9 +498,9 @@ ${cleanQuestion}
   }
 
   // 3. Add useFallback parameter
-  async summarizeArticle(userId, content, title, useFallback = false) {
-    const currentModelName = useFallback ? FALLBACK_MODEL_NAME : MODEL_NAME;
-    const currentModel = useFallback ? this.fallbackTextModel : this.textModel;
+  async summarizeArticle(userId, content, title, tier = 0) {
+    const currentModelName = MODELS[tier] || MODELS[0];
+    const currentModel = this.textModels[tier] || this.textModels[0];
 
     try {
       // Pre-summarize locally to save up to 80% of tokens before calling Gemini
@@ -535,10 +533,9 @@ ${context}
       console.error(`[Gemini Error in summarizeArticle - ${currentModelName}]:`, err.message);
 
       // 4. AUTOMATIC FALLBACK LOGIC
-      // If we hit a 503 and haven't tried the fallback yet, immediately retry!
-      if (err.message.includes('503') && !useFallback) {
-        console.log(`🔄 Google 2.5 servers are busy. Retrying automatically with ${FALLBACK_MODEL_NAME}...`);
-        return this.summarizeArticle(userId, content, title, true);
+      if ((err.message.includes('503') || err.message.includes('429')) && tier < MODELS.length - 1) {
+        console.log(`🔄 ${currentModelName} failed (Quota/Busy). Retrying with ${MODELS[tier + 1]}...`);
+        return this.summarizeArticle(userId, content, title, tier + 1);
       }
 
       await this._logUsage(userId, 'summarize', currentModelName, false, err.message, 0, 0);

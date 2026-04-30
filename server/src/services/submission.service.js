@@ -83,7 +83,7 @@ class SubmissionService {
             score: evaluation.score,
             feedback: evaluation.feedback,
             improvement: evaluation.improvement,
-            model: aiService.hasKey ? 'gemini-1.5-pro-latest' : 'mock',
+            model: aiService.hasKey ? 'gemini-2.0-flash' : 'mock',
             evaluatedAt: Date.now()
           }
         });

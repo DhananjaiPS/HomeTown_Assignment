@@ -12,7 +12,7 @@ import { BookOpen, Sparkles, CheckCircle, Clock, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const ArticleDetail = () => {
-  const { user, refreshUser } = useAuth();
+  const { user, setUser, refreshUser } = useAuth();
   const { slug } = useParams();
 
   const { data: articleResponse, isLoading: isArticleLoading } = useArticle(slug);
@@ -104,7 +104,7 @@ const ArticleDetail = () => {
         // UPDATE TOKEN COUNT INSTANTLY
         if (res?.stats && user) {
           const updatedUser = { ...user, stats: res.stats };
-          setUser(updatedUser);
+          if (setUser) setUser(updatedUser);
           localStorage.setItem('lms_user', JSON.stringify(updatedUser));
         } else if (!cached) {
           refreshUser();
@@ -146,7 +146,7 @@ const ArticleDetail = () => {
       // UPDATE TOKEN COUNT INSTANTLY
       if (res?.stats && user) {
         const updatedUser = { ...user, stats: res.stats };
-        setUser(updatedUser);
+        if (setUser) setUser(updatedUser);
         localStorage.setItem('lms_user', JSON.stringify(updatedUser));
       } else if (!cached) {
         refreshUser();
@@ -206,7 +206,7 @@ const ArticleDetail = () => {
       // UPDATE TOKEN COUNT INSTANTLY (AI evaluation uses tokens)
       if (res?.stats && user) {
         const updatedUser = { ...user, stats: res.stats };
-        setUser(updatedUser);
+        if (setUser) setUser(updatedUser);
         localStorage.setItem('lms_user', JSON.stringify(updatedUser));
       } else {
         refreshUser();
