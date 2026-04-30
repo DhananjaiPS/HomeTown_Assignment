@@ -56,12 +56,21 @@ export const useAIChat = () => {
       }
     } catch (error) {
       console.error('AI Chat Error:', error);
-      toast.error('Failed to get AI response. Please try again.');
+      
+      let errorText = 'Sorry, I am having trouble connecting right now. Please try again later.';
+      
+      // Handle Rate Limit specifically
+      if (error.response?.status === 429 || error.status === 429) {
+        errorText = error.response?.data?.message || 'Limit reached! ⏳ Please try again in a minute.';
+        toast.error('Slow down! Rate limit reached.');
+      } else {
+        toast.error('Failed to get AI response. Please try again.');
+      }
       
       const errorMessage = {
         id: (Date.now() + 1).toString(),
         sender: 'ai',
-        text: 'Sorry, I am having trouble connecting right now. Please try again later.',
+        text: errorText,
         isError: true,
         timestamp: new Date()
       };
