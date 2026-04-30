@@ -372,7 +372,7 @@ ${cleanQuestion}
     }
   }
 
-  async evaluateShortAnswer(userId, questionText, expectedAnswer, rubric, userAnswer, maxMarks, useFallback = false) {
+  async evaluateShortAnswer(userId, questionText, expectedAnswer, rubric, userAnswer, maxMarks, tier = 0) {
     if (!this.hasKey) {
       return {
         score: Math.floor(maxMarks / 2),
