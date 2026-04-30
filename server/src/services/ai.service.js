@@ -179,6 +179,12 @@ User Question: ${message}
         };
       }
 
+      return {
+        answer: 'I am having trouble connecting to my AI brain right now. Please try asking again in a few seconds.',
+        source: 'error',
+        isError: true,
+        mode
+      };
     }
   }
 
